@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { LOADING_MS } from '../src/constants/config';
-import * as mockBackend from '../src/services/mockBackend';
+import * as appBackend from '../src/services/appBackend';
 import { ScreenGradient } from '../src/components/ScreenGradient';
 import { colors, fonts } from '../src/theme/tokens';
 
@@ -13,7 +13,7 @@ export default function LoadingScreen() {
     let alive = true;
     (async () => {
       try {
-        await Promise.all([new Promise((r) => setTimeout(r, LOADING_MS)), mockBackend.hydrate()]);
+        await Promise.all([new Promise((r) => setTimeout(r, LOADING_MS)), appBackend.hydrate()]);
         if (alive) router.replace('/landing');
       } catch (e) {
         if (alive) setFailed(e instanceof Error ? e.message : 'Could not load');

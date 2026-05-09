@@ -10,11 +10,34 @@ import {
   query,
   orderBy,
 } from 'firebase/firestore';
-import { MAX_CLICKS_PER_DAY } from '../constants/config';
+import { MAX_CLICKS_PER_DAY, RATE_LIMIT_MESSAGE } from '../constants/config';
 import { getEasternDateString } from '../utils/easternDate';
 import { db, firebaseEnabled } from './firebaseApp';
-import { RateLimitError, type CounterStateRow, type WallEntryRow } from './mockBackend';
 import { getClicksUsedToday, tryConsumeClick } from './clickBudget';
+
+export class RateLimitError extends Error {
+  constructor(message = RATE_LIMIT_MESSAGE) {
+    super(message);
+    this.name = 'RateLimitError';
+  }
+}
+
+export interface CounterStateRow {
+  goodThingsTotal: number;
+  goodThingsToday: number;
+  goodWishesTotal: number;
+  goodWishesToday: number;
+  lastResetDate: string;
+}
+
+export interface WallEntryRow {
+  id: string;
+  displayName: string;
+  location: string;
+  totalWishes: number;
+  active: boolean;
+  sortOrder: number;
+}
 
 const COUNTERS_COLLECTION = 'counters';
 const COUNTERS_DOC_ID = 'global';

@@ -1,6 +1,6 @@
 # Firebase setup for Taking Monday
 
-This app currently uses a **local mock backend** (`src/services/mockBackend.ts`) so you can run UI and flows without Firebase. When you are ready, wire in Firebase using the steps below.
+This app now uses a **Firebase-only backend** (`src/services/firebaseBackend.ts`). Complete the steps below so the app can run with your Firebase project.
 
 ## 1. Create a Firebase project
 
@@ -62,12 +62,9 @@ Initialize Firebase in something like `src/services/firebaseApp.ts` and export `
 
 Enable **Firebase App Check** before public launch to reduce scripted abuse alongside your click limit.
 
-## 7. Replace the mock
+## 7. Current status
 
-When Firebase is ready:
-
-1. Implement `src/services/firebaseBackend.ts` with the same operations as the mock (`hydrate`, increments, wall CRUD, reorder).
-2. Switch `AppDataProvider` (or a small factory) to use the Firebase implementation when `EXPO_PUBLIC_USE_FIREBASE=1` (or similar).
+`AppDataProvider` is already wired to Firebase-only backend calls. There is no mock fallback path.
 
 ---
 
