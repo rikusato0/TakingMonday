@@ -9,7 +9,7 @@ import { SupportCard } from '../src/components/SupportCard';
 import { EXTERNAL } from '../src/constants/links';
 import { RATE_LIMIT_MESSAGE } from '../src/constants/config';
 import { useAppData } from '../src/context/AppDataContext';
-import { RateLimitError } from '../src/services/mockBackend';
+import { RateLimitError } from '../src/services/appBackend';
 import { colors, fonts, space } from '../src/theme/tokens';
 
 export default function WallScreen() {

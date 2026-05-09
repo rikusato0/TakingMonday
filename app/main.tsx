@@ -8,7 +8,7 @@ import { FooterLinks } from '../src/components/FooterLinks';
 import { ScreenGradient } from '../src/components/ScreenGradient';
 import { RATE_LIMIT_MESSAGE } from '../src/constants/config';
 import { useAppData } from '../src/context/AppDataContext';
-import { RateLimitError } from '../src/services/mockBackend';
+import { RateLimitError } from '../src/services/appBackend';
 import { colors, fonts, radius, space } from '../src/theme/tokens';
 
 const COPY_GOOD_THINGS =

@@ -1,11 +1,18 @@
-import React, { createContext, useContext, useMemo, useSyncExternalStore, type ReactNode } from 'react';
-import * as mockBackend from '../services/mockBackend';
-import type { WallEntryRow } from '../services/mockBackend';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react';
+import * as appBackend from '../services/appBackend';
+import type { WallEntryRow } from '../services/appBackend';
 
 type AppData = {
-  counters: mockBackend.CounterStateRow;
-  publicWall: mockBackend.WallEntryRow[];
-  allWall: mockBackend.WallEntryRow[];
+  counters: appBackend.CounterStateRow;
+  publicWall: appBackend.WallEntryRow[];
+  allWall: appBackend.WallEntryRow[];
   incrementGoodThings: () => Promise<void>;
   incrementGoodWishes: () => Promise<void>;
   incrementWallPerson: (id: string) => Promise<void>;
@@ -18,21 +25,25 @@ type AppData = {
 const Ctx = createContext<AppData | null>(null);
 
 export function AppDataProvider({ children }: { children: ReactNode }) {
-  const data = useSyncExternalStore(mockBackend.subscribe, mockBackend.getSnapshot, mockBackend.getSnapshot);
+  const data = useSyncExternalStore(appBackend.subscribe, appBackend.getSnapshot, appBackend.getSnapshot);
+
+  useEffect(() => {
+    void appBackend.hydrate();
+  }, []);
 
   const value = useMemo<AppData>(() => {
-    const publicWall = mockBackend.getPublicWall();
+    const publicWall = appBackend.getPublicWall();
     return {
       counters: data.counters,
       publicWall,
       allWall: data.wall.slice().sort((a, b) => a.sortOrder - b.sortOrder),
-      incrementGoodThings: () => mockBackend.incrementGoodThings(),
-      incrementGoodWishes: () => mockBackend.incrementGoodWishes(),
-      incrementWallPerson: (id: string) => mockBackend.incrementWallPerson(id),
-      refresh: () => mockBackend.refreshFromStorage(),
-      adminSaveWallEntry: (e) => mockBackend.adminSaveWallEntry(e),
-      adminDeleteWallEntry: (id) => mockBackend.adminDeleteWallEntry(id),
-      adminReorderWall: (ids) => mockBackend.adminReorderWall(ids),
+      incrementGoodThings: () => appBackend.incrementGoodThings(),
+      incrementGoodWishes: () => appBackend.incrementGoodWishes(),
+      incrementWallPerson: (id: string) => appBackend.incrementWallPerson(id),
+      refresh: () => appBackend.refreshFromStorage(),
+      adminSaveWallEntry: (e) => appBackend.adminSaveWallEntry(e),
+      adminDeleteWallEntry: (id) => appBackend.adminDeleteWallEntry(id),
+      adminReorderWall: (ids) => appBackend.adminReorderWall(ids),
     };
   }, [data]);
 

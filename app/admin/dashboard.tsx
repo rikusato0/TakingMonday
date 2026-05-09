@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useAppData } from '../../src/context/AppDataContext';
-import type { WallEntryRow } from '../../src/services/mockBackend';
+import type { WallEntryRow } from '../../src/services/appBackend';
 import { colors, radius, space } from '../../src/theme/tokens';
 
 export default function AdminDashboardScreen() {
