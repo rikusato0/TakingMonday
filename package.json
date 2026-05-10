@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
-    "build:assets": "node scripts/build-assets.cjs"
+    "start": "node scripts/run-expo.cjs",
+    "android": "node scripts/run-expo.cjs --android",
+    "ios": "node scripts/run-expo.cjs --ios",
+    "web": "node scripts/run-expo.cjs --web",
+    "start:online": "expo start",
+    "android:online": "expo start --android",
+    "build:assets": "node scripts/build-assets.cjs",
+    "postinstall": "node scripts/patch-expo-cli-ldplayer.cjs"
   },
   "dependencies": {
     "@expo-google-fonts/road-rage": "^0.4.2",
