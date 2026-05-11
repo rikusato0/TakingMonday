@@ -1,5 +1,9 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, fonts, radius, space } from '../theme/tokens';
+import { useMemo } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import { colors, fonts, space } from '../theme/tokens';
+import { SplatButton } from './SplatButton';
+import { SprayCard } from './SprayCard';
+import { Underline } from './Underline';
 
 type Props = {
   name: string;
@@ -14,119 +18,126 @@ function formatInt(n: number) {
 }
 
 export function SupportCard({ name, location, totalWishes, busy, onPass }: Props) {
+  const heroSize = useMemo(() => {
+    const len = formatInt(totalWishes).length;
+    if (len >= 8) return 24;
+    if (len >= 6) return 28;
+    return 32;
+  }, [totalWishes]);
+
   return (
-    <View style={styles.card}>
-      <Text style={styles.name} numberOfLines={2}>
-        {name}
-      </Text>
-      <View style={styles.nameRule} />
-      <View style={styles.locRow}>
-        <Text style={styles.pin} accessibilityLabel="Location">
-          📍
-        </Text>
-        <Text style={styles.loc} numberOfLines={2}>
-          {location}
-        </Text>
+    <SprayCard
+      source={require('../../assets/show/border_red_card.png')}
+      style={styles.card}
+      contentStyle={styles.content}
+    >
+      <View style={styles.row}>
+        <View style={styles.left}>
+          <Text style={styles.name} numberOfLines={2}>
+            {name}
+          </Text>
+          <Underline
+            source={require('../../assets/show/border_grunge_alex.png')}
+            width="70%"
+            height={5}
+            style={styles.nameUnder}
+          />
+
+          <View style={styles.locRow}>
+            <Image
+              source={require('../../assets/show/border_grunge.png')}
+              style={styles.pin}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
+            />
+            <Text style={styles.loc} numberOfLines={2}>
+              {location}
+            </Text>
+          </View>
+
+          <Text style={[styles.hero, { fontSize: heroSize }]} numberOfLines={1} adjustsFontSizeToFit>
+            {formatInt(totalWishes)}
+          </Text>
+
+          <Text style={styles.sent}>
+            WISHES HAVE{'\n'}BEEN SENT.
+          </Text>
+          <Underline
+            source={require('../../assets/show/border_grunge_been_sent.png')}
+            width={66}
+            height={4}
+            style={styles.sentUnder}
+          />
+        </View>
+
+        <SplatButton
+          normal={require('../../assets/main/btn_pass_one_forward_normal.png')}
+          pressedSrc={require('../../assets/main/btn_pass_one_forward_pressed.png')}
+          onPress={onPass}
+          busy={busy}
+          width={124}
+          height={114}
+          accessibilityLabel={`Pass one forward to ${name}`}
+          style={styles.splat}
+        />
       </View>
-      <View style={styles.countRow}>
-        <Text style={styles.countNum} numberOfLines={1} adjustsFontSizeToFit>
-          {formatInt(totalWishes)}
-        </Text>
-        <Text style={styles.sent}>WISHES HAVE BEEN SENT.</Text>
-      </View>
-      <Pressable
-        onPress={onPass}
-        disabled={busy}
-        style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed, busy && styles.ctaDisabled]}
-      >
-        {busy ? (
-          <ActivityIndicator color={colors.textOnGreen} />
-        ) : (
-          <Text style={styles.ctaText}>PASS ONE FORWARD →</Text>
-        )}
-      </Pressable>
-    </View>
+    </SprayCard>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.cardDark,
-    borderRadius: radius.card,
-    padding: space.lg,
-    borderWidth: 2,
-    borderColor: colors.orange,
-    gap: space.sm,
-    marginBottom: space.md,
+  card: { marginBottom: space.md },
+  content: {
+    paddingLeft: 18,
+    paddingRight: 10,
+    paddingTop: 16,
+    paddingBottom: 18,
   },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+  },
+  left: { flex: 1, minWidth: 0 },
   name: {
     fontFamily: fonts.body,
-    fontSize: 17,
-    fontWeight: '900',
-    color: colors.orangeDeep,
-    letterSpacing: 1,
+    fontSize: 20,
+    color: colors.orange,
+    letterSpacing: 0.6,
   },
-  nameRule: {
-    marginTop: 4,
-    height: 3,
-    width: '92%',
-    backgroundColor: colors.orange,
-    borderRadius: 2,
-    opacity: 0.95,
-  },
+  nameUnder: { marginTop: 2, marginBottom: 2 },
   locRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: space.xs,
-    marginTop: space.sm,
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
   },
-  pin: { fontSize: 14, marginTop: 1 },
+  pin: { width: 12, height: 16 },
   loc: {
-    flex: 1,
+    flexShrink: 1,
     fontFamily: fonts.body,
-    fontSize: 12,
+    fontSize: 11,
     color: colors.goodGreenBright,
-    fontWeight: '800',
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
-  countRow: {
-    marginTop: space.md,
-    alignItems: 'flex-start',
-    gap: 4,
-  },
-  countNum: {
+  hero: {
     fontFamily: fonts.display,
-    fontSize: 36,
     color: colors.textOnGreen,
+    marginTop: 6,
   },
   sent: {
     fontFamily: fonts.body,
-    fontSize: 9,
-    lineHeight: 13,
-    color: colors.textMutedOnDark,
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-  },
-  cta: {
-    marginTop: space.md,
-    borderWidth: 2,
-    borderColor: colors.orangeDeep,
-    borderRadius: radius.full,
-    paddingVertical: space.md,
-    paddingHorizontal: space.lg,
-    alignItems: 'center',
-    alignSelf: 'center',
-    backgroundColor: colors.orange,
-    minWidth: 200,
-  },
-  ctaPressed: { opacity: 0.92 },
-  ctaDisabled: { opacity: 0.55 },
-  ctaText: {
-    fontFamily: fonts.body,
     fontSize: 11,
-    fontWeight: '900',
+    lineHeight: 14,
     color: colors.textOnGreen,
-    letterSpacing: 0.8,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+    marginTop: 2,
+  },
+  sentUnder: { marginTop: 2 },
+  splat: {
+    marginRight: -6,
+    marginLeft: -4,
   },
 });

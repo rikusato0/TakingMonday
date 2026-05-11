@@ -1,11 +1,12 @@
 import * as WebBrowser from 'expo-web-browser';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandHeader } from '../src/components/BrandHeader';
 import { ScreenGradient } from '../src/components/ScreenGradient';
 import { SupportCard } from '../src/components/SupportCard';
+import { Underline } from '../src/components/Underline';
 import { EXTERNAL } from '../src/constants/links';
 import { RATE_LIMIT_MESSAGE } from '../src/constants/config';
 import { useAppData } from '../src/context/AppDataContext';
@@ -34,6 +35,11 @@ export default function WallScreen() {
     <ScreenGradient>
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
         <View style={styles.head}>
+          <BrandHeader
+            onRefresh={() => void refresh()}
+            onLongPressAdmin={() => router.push('/admin/login')}
+          />
+
           <Pressable
             onPress={() => {
               void refresh();
@@ -41,15 +47,59 @@ export default function WallScreen() {
             }}
             hitSlop={12}
             style={styles.backWrap}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
           >
-            <Text style={styles.backText}>{'< '}BACK</Text>
+            <View style={styles.backRow}>
+              <Image
+                source={require('../assets/show/border_bottom_backbutton.png')}
+                style={styles.backArrow}
+                resizeMode="contain"
+                accessibilityIgnoresInvertColors
+              />
+              <Text style={styles.backText}>BACK</Text>
+            </View>
+            <Underline
+              source={require('../assets/show/border_grunge_backbutton.png')}
+              width={64}
+              height={4}
+              style={styles.backUnder}
+            />
           </Pressable>
-          <BrandHeader
-            onRefresh={() => void refresh()}
-            onLongPressAdmin={() => router.push('/admin/login')}
+
+          <View style={styles.titleRow}>
+            <Image
+              source={require('../assets/show/layer_163_for_someone_wall.png')}
+              style={styles.titleDing}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
+            />
+            <Text style={styles.pageTitle}>FOR SOMEONE WALL</Text>
+            <Image
+              source={require('../assets/show/layer_166_for_someone_wall.png')}
+              style={styles.titleDing}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
+            />
+          </View>
+          <Underline
+            source={require('../assets/show/underline_for_someone_wall.png')}
+            width={240}
+            height={10}
+            style={styles.titleUnder}
           />
-          <Text style={styles.pageTitle}>FOR SOMEONE WALL</Text>
-          <View style={styles.titleUnderline} />
+
+          <View style={styles.subtitleWrap}>
+            <Text style={styles.subtitle}>
+              Click. For someone <Text style={styles.subtitleEmph}>out there.</Text>
+            </Text>
+            <Underline
+              source={require('../assets/show/underline_out_there.png')}
+              width={70}
+              height={3}
+              style={styles.subtitleUnder}
+            />
+          </View>
         </View>
 
         <FlatList
@@ -72,8 +122,37 @@ export default function WallScreen() {
             />
           )}
           ListFooterComponent={
-            <Pressable onPress={() => void WebBrowser.openBrowserAsync(EXTERNAL.website)} style={styles.footerLink}>
-              <Text style={styles.footerText}>Want your name on this page? Reach out on our website.</Text>
+            <Pressable
+              onPress={() => void WebBrowser.openBrowserAsync(EXTERNAL.website)}
+              style={styles.footerWrap}
+              accessibilityRole="link"
+              accessibilityLabel="Reach out on our website"
+            >
+              <View style={styles.footerRow}>
+                <Image
+                  source={require('../assets/show/arrow.png')}
+                  style={styles.footerArrow}
+                  resizeMode="contain"
+                  accessibilityIgnoresInvertColors
+                />
+                <View style={styles.footerCenter}>
+                  <Text style={styles.footerText}>
+                    Want your name on this page?{'\n'}Reach out on <Text style={styles.footerEmph}>our website.</Text>
+                  </Text>
+                  <Underline
+                    source={require('../assets/show/underline_green_our_website.png')}
+                    width={92}
+                    height={4}
+                    style={styles.footerUnder}
+                  />
+                </View>
+                <Image
+                  source={require('../assets/show/heart_outline.png')}
+                  style={styles.footerHeart}
+                  resizeMode="contain"
+                  accessibilityIgnoresInvertColors
+                />
+              </View>
             </Pressable>
           }
         />
@@ -84,39 +163,71 @@ export default function WallScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
-  head: { paddingHorizontal: space.lg, paddingBottom: space.sm },
-  backWrap: { alignSelf: 'flex-start', marginBottom: space.sm },
+  head: { paddingHorizontal: space.md, paddingBottom: space.sm },
+  backWrap: {
+    alignSelf: 'flex-start',
+    marginTop: 2,
+    marginBottom: space.sm,
+    paddingVertical: 2,
+  },
+  backRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  backArrow: { width: 14, height: 14 },
   backText: {
     fontFamily: fonts.body,
     fontSize: 12,
-    fontWeight: '900',
     color: colors.textOnGreen,
-    letterSpacing: 0.6,
-  },
-  pageTitle: {
-    fontFamily: fonts.display,
-    fontSize: 28,
-    color: colors.orange,
-    marginTop: space.md,
     letterSpacing: 0.5,
   },
-  titleUnderline: {
-    marginTop: space.xs,
-    height: 4,
-    width: '85%',
-    backgroundColor: colors.orange,
-    borderRadius: 2,
-    opacity: 0.95,
+  backUnder: { marginTop: 1, marginLeft: 18 },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 4,
   },
-  list: { padding: space.lg, paddingTop: space.sm, paddingBottom: space.xxl },
-  footerLink: { paddingVertical: space.xl, paddingHorizontal: space.sm },
-  footerText: {
+  titleDing: { width: 22, height: 22 },
+  pageTitle: {
+    fontFamily: fonts.display,
+    fontSize: 30,
+    color: colors.textOnGreen,
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  titleUnder: { alignSelf: 'center', marginTop: 0, marginBottom: space.sm },
+  subtitleWrap: { alignItems: 'center', marginTop: 2, marginBottom: space.xs },
+  subtitle: {
     fontFamily: fonts.body,
     fontSize: 13,
-    fontWeight: '700',
-    color: colors.textMutedOnDark,
-    textAlign: 'center',
-    lineHeight: 20,
+    color: colors.textOnGreen,
     letterSpacing: 0.3,
+    textAlign: 'center',
   },
+  subtitleEmph: { color: colors.textOnGreen },
+  subtitleUnder: { marginTop: 1, marginLeft: 70 },
+  list: {
+    paddingHorizontal: space.md,
+    paddingTop: space.sm,
+    paddingBottom: space.xxl,
+  },
+  footerWrap: { paddingVertical: space.lg, paddingHorizontal: space.xs },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  footerArrow: { width: 28, height: 22, opacity: 0.85 },
+  footerHeart: { width: 26, height: 24, opacity: 0.85 },
+  footerCenter: { flexShrink: 1, alignItems: 'center' },
+  footerText: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    lineHeight: 17,
+    color: colors.textOnGreen,
+    textAlign: 'center',
+    letterSpacing: 0.2,
+  },
+  footerEmph: { color: colors.textOnGreen },
+  footerUnder: { marginTop: 1, alignSelf: 'center' },
 });
