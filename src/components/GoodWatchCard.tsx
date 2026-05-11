@@ -2,11 +2,16 @@ import * as WebBrowser from 'expo-web-browser';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { EXTERNAL } from '../constants/links';
 import { colors, fonts, space } from '../theme/tokens';
+import { SprayCard } from './SprayCard';
 
 /** Figma "SOMETHING GOOD TO WATCH" card. */
 export function GoodWatchCard() {
   return (
-    <View style={styles.card}>
+    <SprayCard
+      source={require('../../assets/main/border_whitte_video_card.png')}
+      style={styles.card}
+      contentStyle={styles.content}
+    >
       <Text style={styles.kicker}>SHARED BY SOMEONE</Text>
 
       <View style={styles.row}>
@@ -45,19 +50,18 @@ export function GoodWatchCard() {
           </Pressable>
         </View>
       </View>
-    </View>
+    </SprayCard>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     marginBottom: space.md,
-    paddingHorizontal: 14,
-    paddingTop: 8,
+  },
+  content: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
     paddingBottom: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.55)',
   },
   kicker: {
     alignSelf: 'flex-end',
