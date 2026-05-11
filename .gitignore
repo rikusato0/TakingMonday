@@ -37,6 +37,11 @@ yarn-error.*
 .env
 .env*.local
 
+# Firebase Admin SDK service account credentials — NEVER commit
+serviceAccount.json
+serviceAccount*.json
+*-firebase-adminsdk-*.json
+
 # typescript
 *.tsbuildinfo
 

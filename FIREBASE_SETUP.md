@@ -138,20 +138,66 @@ step fails, the session is signed out and the screen shows a clear error.
 
 ### Create your first admin
 
-Clients can't bootstrap an admin record because Firestore rules require
-an existing admin. Use the included Node script + the **Firebase Admin
-SDK** from a trusted machine:
+Clients can't bootstrap an admin record because the Firestore rules
+above require an existing admin to write `admins/{uid}`. Pick one of
+the two paths below.
+
+#### Option A — manual, no extra install (recommended for the first admin)
+
+1. **Authentication → Users → Add user**: enter the admin email +
+   password (Firebase will hash the password for you).
+2. Copy the **User UID** Firebase shows for that new user.
+3. **Firestore → Start collection** (if missing) named `admins`.
+4. Add a document with **Document ID = that UID** and these fields:
+
+   | Field         | Type      | Value                  |
+   | ------------- | --------- | ---------------------- |
+   | `email`       | string    | the admin's email      |
+   | `active`      | boolean   | `true`                 |
+   | `displayName` | string    | (optional)             |
+   | `updatedAt`   | timestamp | (use "current time")   |
+
+5. Publish the suggested Firestore rules from §2. (If you need to
+   loosen them temporarily for step 4, do it inside the Rules tab,
+   then tighten right after.)
+
+The app's login screen will now accept that admin's email + password
+and the admin role check will pass.
+
+#### Option B — scripted, via `firebase-admin` (good for additional admins / CI)
 
 ```bash
 # One-time install of the Admin SDK (dev dependency)
 npm install --save-dev firebase-admin
+```
 
-# Generate a service account JSON in Firebase Console:
-#   Project settings → Service accounts → "Generate new private key".
-# Save it locally (DO NOT COMMIT IT).
+Then generate a service-account JSON in Firebase Console:
+**Project settings → Service accounts → "Generate new private key"**.
+Save it locally (`./serviceAccount.json`) and **never commit it** —
+`.gitignore` already covers `.env` but you should add `serviceAccount*.json`
+too.
 
+Run the seed script. Note that env-var syntax differs per shell:
+
+**Git Bash / WSL / macOS / Linux**
+
+```bash
 GOOGLE_APPLICATION_CREDENTIALS=./serviceAccount.json \
-  npm run seed:admin -- --email frederick.tarantino@gmail.com --password 'StrongPass!' --name "Fred"
+  npm run seed:admin -- --email you@example.com --password 'StrongPass!' --name "You"
+```
+
+**Windows CMD**
+
+```bat
+set GOOGLE_APPLICATION_CREDENTIALS=.\serviceAccount.json
+npm run seed:admin -- --email you@example.com --password "StrongPass!" --name "You"
+```
+
+**PowerShell**
+
+```powershell
+$env:GOOGLE_APPLICATION_CREDENTIALS = ".\serviceAccount.json"
+npm run seed:admin -- --email you@example.com --password "StrongPass!" --name "You"
 ```
 
 The script will:
@@ -161,12 +207,33 @@ The script will:
 - Set a custom claim `{ admin: true }` (useful if you migrate to
   claim-based rules later).
 
-To revoke admin access without deleting the user:
+To revoke admin access without deleting the auth user, pass
+`--inactive` and omit `--password`:
 
-```bash
-GOOGLE_APPLICATION_CREDENTIALS=./serviceAccount.json \
-  npm run seed:admin -- --email you@example.com --inactive
+```bat
+:: Windows CMD
+set GOOGLE_APPLICATION_CREDENTIALS=.\serviceAccount.json
+npm run seed:admin -- --email you@example.com --inactive
 ```
+
+> **Troubleshooting `npm install firebase-admin` →
+> `UNABLE_TO_VERIFY_LEAF_SIGNATURE`**: your machine is behind a TLS-
+> intercepting proxy or antivirus (Zscaler, corporate firewall, etc.)
+> and Node doesn't trust its root CA. Fix in this order:
+>
+> 1. `set NODE_OPTIONS=--use-system-ca` (Windows CMD) or
+>    `export NODE_OPTIONS=--use-system-ca` (bash), then retry the
+>    install. Works on Node 18.18+ / 20+ / 22+.
+> 2. Check for a stale proxy/CA in npm config:
+>    `npm config get https-proxy`, `npm config get cafile`. Clear
+>    stale values with `npm config delete https-proxy` etc.
+> 3. If your org issued a root CA bundle, point npm at it:
+>    `npm config set cafile "C:\path\to\corporate-root-ca.pem"`.
+> 4. **Last resort, one-off:** `npm config set strict-ssl false`,
+>    install, then `npm config delete strict-ssl`. Don't leave it off.
+>
+> If the install keeps failing, Option A is fine — you don't need
+> `firebase-admin` installed locally to ship the app.
 
 ### Sign-in flow in the app
 
