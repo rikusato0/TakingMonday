@@ -11,7 +11,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { ADMIN_LONG_PRESS_MS } from '../../src/constants/config';
 import { useAppData } from '../../src/context/AppDataContext';
 import { AdminAuthError } from '../../src/services/adminAuth';
 import { colors, space } from '../../src/theme/tokens';
@@ -131,16 +130,6 @@ export default function AdminLoginScreen() {
               <Text style={styles.btnText}>Sign in</Text>
             )}
           </Pressable>
-
-          <Text style={styles.note}>
-            Entry from the app is hidden on purpose (not shown in the public Figma): on the home screen, press and
-            hold the Taking Monday logo for {ADMIN_LONG_PRESS_MS / 1000} seconds to open this screen.
-          </Text>
-          <Text style={styles.note}>
-            Sign-in is verified by Firebase Authentication. Only accounts with a matching{' '}
-            <Text style={styles.code}>admins/&lt;uid&gt;</Text> document and{' '}
-            <Text style={styles.code}>active != false</Text> can manage wall entries.
-          </Text>
         </View>
       </KeyboardAvoidingView>
     </>
@@ -174,11 +163,5 @@ const styles = StyleSheet.create({
     marginTop: space.sm,
     color: '#B00020',
     fontWeight: '700',
-  },
-  note: { marginTop: space.md, color: colors.textMuted, fontSize: 13, lineHeight: 18 },
-  code: {
-    fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
-    fontSize: 12,
-    color: colors.text,
   },
 });

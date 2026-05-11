@@ -21,8 +21,18 @@ export function ScreenGradient({ children, style, edgeAccents }: Props) {
       />
       {edgeAccents ? (
         <>
-          <View style={styles.accentLeft} />
-          <View style={styles.accentRight} />
+          <Image
+            source={require('../../assets/landing/graffiti_left_green.png')}
+            style={styles.accentLeft}
+            resizeMode="stretch"
+            accessibilityIgnoresInvertColors
+          />
+          <Image
+            source={require('../../assets/landing/graffiti_right_red.png')}
+            style={styles.accentRight}
+            resizeMode="stretch"
+            accessibilityIgnoresInvertColors
+          />
         </>
       ) : null}
       <View style={styles.content}>{children}</View>
@@ -48,17 +58,15 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
-    width: 6,
-    backgroundColor: colors.accentBarGreen,
-    opacity: 0.85,
+    width: 26,
+    height: '100%',
   },
   accentRight: {
     position: 'absolute',
     right: 0,
     top: 0,
     bottom: 0,
-    width: 6,
-    backgroundColor: colors.accentBarRed,
-    opacity: 0.85,
+    width: 26,
+    height: '100%',
   },
 });
