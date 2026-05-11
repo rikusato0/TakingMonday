@@ -1,19 +1,17 @@
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { Alert, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandHeader } from '../src/components/BrandHeader';
 import { CounterBlock } from '../src/components/CounterBlock';
-import { FooterLinks } from '../src/components/FooterLinks';
+import { GoodWatchCard } from '../src/components/GoodWatchCard';
+import { MainMotto } from '../src/components/MainMotto';
 import { ScreenGradient } from '../src/components/ScreenGradient';
+import { ShowUpRow } from '../src/components/ShowUpRow';
 import { RATE_LIMIT_MESSAGE } from '../src/constants/config';
 import { useAppData } from '../src/context/AppDataContext';
 import { RateLimitError } from '../src/services/appBackend';
-import { colors, fonts, radius, space } from '../src/theme/tokens';
-
-const COPY_GOOD_THINGS =
-  'CLICK IF YOU DID SOMETHING GOOD OR SAW SOMEONE ELSE DO SOMETHING GOOD.';
-const COPY_GOOD_WISHES = 'SHOW UP FOR SOMEONE';
+import { space } from '../src/theme/tokens';
 
 export default function MainScreen() {
   const { counters, incrementGoodThings, incrementGoodWishes, refresh } = useAppData();
@@ -31,52 +29,57 @@ export default function MainScreen() {
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <BrandHeader
             onRefresh={() => void refresh()}
             onLongPressAdmin={() => router.push('/admin/login')}
           />
 
           <CounterBlock
+            variant="green"
             title="GOOD THINGS"
-            subtitle={COPY_GOOD_THINGS}
+            subtitle="GOOD THINGS HAVE BEEN DONE"
             today={counters.goodThingsToday}
             total={counters.goodThingsTotal}
             busy={busyG}
-            variant="green"
-            onAdd={() => {
+            onAction={() => {
               if (busyG) return;
               setBusyG(true);
               void incrementGoodThings()
                 .catch(onErr)
                 .finally(() => setBusyG(false));
             }}
+            paragraph={{
+              before: 'CLICK IF YOU DID SOMETHING GOOD OR SAW ',
+              emphasized: 'SOMEONE ELSE',
+              after: ' DO SOMETHING GOOD.',
+            }}
           />
 
           <CounterBlock
+            variant="orange"
             title="GOOD WISHES"
-            subtitle={COPY_GOOD_WISHES}
+            subtitle="GOOD WISHES HAVE BEEN MADE"
             today={counters.goodWishesToday}
             total={counters.goodWishesTotal}
             busy={busyW}
-            variant="orange"
-            onAdd={() => {
+            onAction={() => {
               if (busyW) return;
               setBusyW(true);
               void incrementGoodWishes()
                 .catch(onErr)
                 .finally(() => setBusyW(false));
             }}
+            bottomRow={<ShowUpRow onPress={() => router.push('/wall')} />}
           />
 
-          <Pressable
-            onPress={() => router.push('/wall')}
-            style={({ pressed }) => [styles.navBtn, pressed && styles.navBtnPressed]}
-          >
-            <Text style={styles.navBtnText}>SHOW UP FOR SOMEONE</Text>
-          </Pressable>
+          <GoodWatchCard />
 
-          <FooterLinks />
+          <MainMotto />
         </ScrollView>
       </SafeAreaView>
     </ScreenGradient>
@@ -86,25 +89,8 @@ export default function MainScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
   scroll: {
-    padding: space.lg,
-    paddingBottom: space.xxl,
-    gap: space.md,
-  },
-  navBtn: {
-    marginTop: space.md,
-    borderRadius: radius.button,
-    borderWidth: 2,
-    borderColor: colors.orange,
-    paddingVertical: space.lg,
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-  },
-  navBtnPressed: { opacity: 0.92 },
-  navBtnText: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    fontWeight: '900',
-    color: colors.orange,
-    letterSpacing: 1,
+    paddingHorizontal: space.md,
+    paddingTop: space.xs,
+    paddingBottom: space.lg,
   },
 });

@@ -7,7 +7,6 @@ type Props = {
   onRefresh?: () => void;
 };
 
-/** Matches Figma `logo_group` + smiley aspect (~183×39). */
 const WORDMARK_ASPECT = 183 / 39;
 
 export function BrandHeader({ onLongPressAdmin, onRefresh }: Props) {
@@ -20,15 +19,27 @@ export function BrandHeader({ onLongPressAdmin, onRefresh }: Props) {
       delayLongPress={ADMIN_LONG_PRESS_MS}
       style={({ pressed }) => [styles.wrap, pressed && styles.pressed]}
     >
-      <Image source={require('../../assets/smiley-mark.png')} style={styles.smiley} accessibilityIgnoresInvertColors />
+      <Image
+        source={require('../../assets/smiley-mark.png')}
+        style={styles.smiley}
+        resizeMode="contain"
+        accessibilityIgnoresInvertColors
+      />
       <View style={styles.col}>
-        <Image
-          source={require('../../assets/logo-wordmark.png')}
-          style={styles.wordmark}
-          resizeMode="contain"
-          accessibilityIgnoresInvertColors
-        />
-        <View style={styles.underline} />
+        <View style={styles.wordRow}>
+          <Image
+            source={require('../../assets/logo-wordmark.png')}
+            style={styles.wordmark}
+            resizeMode="contain"
+            accessibilityIgnoresInvertColors
+          />
+          <Image
+            source={require('../../assets/main/lightning.png')}
+            style={styles.lightning}
+            resizeMode="contain"
+            accessibilityIgnoresInvertColors
+          />
+        </View>
         <Text style={styles.tagline}>
           THE WORLD&apos;S A LOT.{'\n'}LET&apos;S DO SOMETHING ABOUT IT.
         </Text>
@@ -41,35 +52,23 @@ const styles = StyleSheet.create({
   wrap: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: space.md,
+    gap: space.sm,
     alignSelf: 'stretch',
-    paddingVertical: space.sm,
+    paddingTop: space.xs,
+    paddingBottom: space.sm,
   },
   pressed: { opacity: 0.9 },
-  smiley: {
-    width: 48,
-    height: 48,
-    marginTop: 2,
-  },
+  smiley: { width: 44, height: 44, marginTop: 4 },
   col: { flex: 1, minWidth: 0 },
-  wordmark: {
-    width: '100%',
-    aspectRatio: WORDMARK_ASPECT,
-    maxHeight: 52,
-  },
-  underline: {
-    marginTop: 6,
-    height: 4,
-    width: 120,
-    backgroundColor: colors.goodGreenBright,
-    borderRadius: 2,
-  },
+  wordRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  wordmark: { flex: 1, aspectRatio: WORDMARK_ASPECT, maxHeight: 44 },
+  lightning: { width: 18, height: 26 },
   tagline: {
-    marginTop: space.sm,
+    marginTop: 6,
     fontFamily: fonts.body,
     fontSize: 9,
     lineHeight: 13,
-    letterSpacing: 0.7,
+    letterSpacing: 0.5,
     color: colors.textOnGreen,
     textTransform: 'uppercase',
   },

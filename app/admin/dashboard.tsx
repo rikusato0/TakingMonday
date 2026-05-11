@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Modal,
@@ -16,8 +17,36 @@ import type { WallEntryRow } from '../../src/services/appBackend';
 import { colors, radius, space } from '../../src/theme/tokens';
 
 export default function AdminDashboardScreen() {
-  const { allWall, adminSaveWallEntry, adminDeleteWallEntry, adminReorderWall } = useAppData();
+  const {
+    allWall,
+    adminSaveWallEntry,
+    adminDeleteWallEntry,
+    adminReorderWall,
+    admin,
+    signOutAdmin,
+  } = useAppData();
   const [modal, setModal] = useState<WallEntryRow | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = useCallback(() => {
+    Alert.alert('Sign out?', admin?.email ?? '', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign out',
+        style: 'destructive',
+        onPress: async () => {
+          setSigningOut(true);
+          try {
+            await signOutAdmin();
+          } catch (e) {
+            Alert.alert('Sign-out failed', (e as Error)?.message ?? 'Try again.');
+          } finally {
+            setSigningOut(false);
+          }
+        },
+      },
+    ]);
+  }, [admin, signOutAdmin]);
 
   const sorted = useMemo(
     () => allWall.slice().sort((a, b) => a.sortOrder - b.sortOrder),
@@ -53,8 +82,34 @@ export default function AdminDashboardScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Wall', headerBackTitle: 'Back' }} />
+      <Stack.Screen
+        options={{
+          title: 'Wall',
+          headerBackTitle: 'Back',
+          headerRight: () => (
+            <Pressable
+              onPress={handleSignOut}
+              disabled={signingOut}
+              hitSlop={8}
+              style={{ paddingHorizontal: space.sm, paddingVertical: 4 }}
+            >
+              {signingOut ? (
+                <ActivityIndicator size="small" color={colors.primary} />
+              ) : (
+                <Text style={styles.headerRight}>Sign out</Text>
+              )}
+            </Pressable>
+          ),
+        }}
+      />
       <View style={styles.toolbar}>
+        <View style={{ flex: 1 }}>
+          {admin?.email ? (
+            <Text style={styles.signedIn} numberOfLines={1}>
+              Signed in as <Text style={styles.signedInEmail}>{admin.email}</Text>
+            </Text>
+          ) : null}
+        </View>
         <Pressable onPress={openNew} style={styles.toolBtn}>
           <Text style={styles.toolBtnText}>+ Add entry</Text>
         </Pressable>
@@ -173,15 +228,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     paddingTop: space.sm,
     paddingBottom: space.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
   },
   toolBtn: {
-    alignSelf: 'flex-start',
     backgroundColor: colors.primary,
     paddingHorizontal: space.lg,
     paddingVertical: space.sm,
     borderRadius: radius.button,
   },
   toolBtnText: { color: '#fff', fontWeight: '800' },
+  signedIn: { color: colors.textMuted, fontSize: 13 },
+  signedInEmail: { color: colors.text, fontWeight: '700' },
+  headerRight: { color: colors.primary, fontWeight: '800', fontSize: 15 },
   list: { padding: space.lg, paddingBottom: 48, gap: space.md },
   card: {
     backgroundColor: colors.surface,

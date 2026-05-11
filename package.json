@@ -10,6 +10,7 @@
     "start:online": "expo start",
     "android:online": "expo start --android",
     "build:assets": "node scripts/build-assets.cjs",
+    "seed:admin": "node scripts/seed-admin.cjs",
     "postinstall": "node scripts/patch-expo-cli-ldplayer.cjs"
   },
   "dependencies": {

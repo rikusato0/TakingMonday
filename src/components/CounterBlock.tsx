@@ -1,178 +1,201 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, fonts, radius, space } from '../theme/tokens';
+import { StyleSheet, Text, View } from 'react-native';
+import { colors, fonts, space } from '../theme/tokens';
+import { SprayCard } from './SprayCard';
+import { SplatButton } from './SplatButton';
+import { Underline } from './Underline';
+
+type Variant = 'green' | 'orange';
 
 type Props = {
+  variant: Variant;
   title: string;
+  /** Subtitle line (e.g. "GOOD THINGS HAVE BEEN DONE"). */
   subtitle: string;
-  totalLabel?: string;
-  todayLabel?: string;
+  /** Optional descriptive paragraph (Good Things only). */
+  paragraph?: { before: string; emphasized: string; after: string };
+  /** Optional row at the bottom (Good Wishes => "SHOW UP FOR SOMEONE"). */
+  bottomRow?: React.ReactNode;
   today: number;
   total: number;
   busy?: boolean;
-  onAdd: () => void;
-  variant: 'green' | 'orange';
+  onAction: () => void;
 };
+
+const ASSETS = {
+  green: {
+    border: require('../../assets/main/border_green.png'),
+    titleUnderline: require('../../assets/main/border_good_things.png'),
+    subtitleUnderline: require('../../assets/main/underline_lets_do_something_about_it.png'),
+    statUnderline: require('../../assets/main/undeline_96003.png'),
+    btnNormal: require('../../assets/main/btn_add_one_normal.png'),
+    btnPressed: require('../../assets/main/btn_add_one_pressed.png'),
+  },
+  orange: {
+    border: require('../../assets/main/border_red.png'),
+    titleUnderline: require('../../assets/main/border_good_wishes.png'),
+    subtitleUnderline: require('../../assets/main/border_96003_orange.png'),
+    statUnderline: require('../../assets/main/border_96003_orange.png'),
+    btnNormal: require('../../assets/main/btn_pass_one_forward_normal.png'),
+    btnPressed: require('../../assets/main/btn_pass_one_forward_pressed.png'),
+  },
+} as const;
 
 function formatInt(n: number) {
   return new Intl.NumberFormat().format(n);
 }
 
 export function CounterBlock({
+  variant,
   title,
   subtitle,
-  totalLabel = 'ALL-TIME',
-  todayLabel = 'TODAY',
+  paragraph,
+  bottomRow,
   today,
   total,
   busy,
-  onAdd,
-  variant,
+  onAction,
 }: Props) {
-  const accent = variant === 'green' ? colors.goodGreen : colors.orangeDeep;
-  const accentMid = variant === 'green' ? colors.statGreen : colors.orange;
-  const btnBg = variant === 'green' ? colors.goodGreenStroke : colors.orange;
-  const btnBorder = variant === 'green' ? colors.goodGreenBright : colors.orangeDeep;
-  const todayFontSize = useMemo(() => {
-    const len = formatInt(today).length;
-    if (len >= 7) return 26;
-    if (len >= 5) return 30;
-    return 34;
-  }, [today]);
-  const totalFontSize = useMemo(() => {
+  const a = ASSETS[variant];
+  const accent = variant === 'green' ? colors.goodGreenBright : colors.orange;
+
+  const heroSize = useMemo(() => {
     const len = formatInt(total).length;
-    if (len >= 8) return 22;
-    if (len >= 6) return 24;
-    return 26;
+    if (len >= 8) return 26;
+    if (len >= 6) return 30;
+    return 34;
   }, [total]);
 
   return (
-    <View style={styles.card}>
+    <SprayCard source={a.border} style={styles.card} contentStyle={styles.content}>
       <Text style={[styles.title, { color: accent }]}>{title}</Text>
-      <View
-        style={[styles.titleRule, { backgroundColor: variant === 'green' ? colors.goodGreenStroke : colors.orange }]}
-      />
-      <View style={styles.statsRow}>
-        <View style={styles.stat}>
-          <Text style={[styles.statLabel, { color: accent }]}>{todayLabel}</Text>
-          <Text
-            style={[styles.todayNum, { color: accentMid, fontSize: todayFontSize }]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
-            {formatInt(today)}
-          </Text>
-        </View>
-        <View style={[styles.divider, { backgroundColor: colors.divider }]} />
-        <View style={styles.stat}>
-          <Text style={[styles.statLabel, { color: colors.text }]}>{totalLabel}</Text>
-          <Text
-            style={[styles.totalNum, { color: colors.cream, fontSize: totalFontSize }]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
+      <Underline source={a.titleUnderline} width={130} height={7} style={styles.titleUnderline} />
+
+      <View style={styles.body}>
+        <View style={styles.left}>
+          <Text style={[styles.hero, { fontSize: heroSize }]} numberOfLines={1} adjustsFontSizeToFit>
             {formatInt(total)}
           </Text>
-        </View>
-      </View>
-      <Text style={styles.desc}>{subtitle}</Text>
-      <Pressable
-        onPress={onAdd}
-        disabled={busy}
-        style={({ pressed }) => [
-          styles.btn,
-          { backgroundColor: btnBg, borderColor: btnBorder },
-          pressed && styles.btnPressed,
-          busy && styles.btnDisabled,
-        ]}
-      >
-        {busy ? (
-          <ActivityIndicator color={colors.textOnGreen} />
-        ) : (
-          <View style={styles.btnInner}>
-            <Text style={styles.btnPlus}>+</Text>
-            <Text style={styles.btnText}>ADD ONE</Text>
+          <Text style={styles.subtitle}>{subtitle}</Text>
+          <Underline source={a.subtitleUnderline} width={90} height={4} style={styles.subtitleUnderline} />
+
+          <View style={styles.statsRow}>
+            <View style={styles.statCol}>
+              <Text style={[styles.statLabel, { color: accent }]}>TODAY</Text>
+              <Text style={[styles.statNum, { color: accent }]} numberOfLines={1} adjustsFontSizeToFit>
+                {formatInt(today)}
+              </Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statCol}>
+              <Text style={styles.statLabel}>ALL-TIME</Text>
+              <Text style={styles.statNum} numberOfLines={1} adjustsFontSizeToFit>
+                {formatInt(total)}
+              </Text>
+              <Underline source={a.statUnderline} width={70} height={3} />
+            </View>
           </View>
-        )}
-      </Pressable>
-    </View>
+        </View>
+
+        <SplatButton
+          normal={a.btnNormal}
+          pressedSrc={a.btnPressed}
+          onPress={onAction}
+          busy={busy}
+          width={108}
+          height={94}
+          accessibilityLabel={variant === 'green' ? 'Add one good thing' : 'Pass one forward'}
+          style={styles.splat}
+        />
+      </View>
+
+      {paragraph ? (
+        <Text style={styles.paragraph}>
+          {paragraph.before}
+          <Text style={[styles.paragraphEmph, { color: accent }]}>{paragraph.emphasized}</Text>
+          {paragraph.after}
+        </Text>
+      ) : null}
+
+      {bottomRow ? <View style={styles.bottom}>{bottomRow}</View> : null}
+    </SprayCard>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.card,
-    padding: space.lg,
-    borderWidth: 2,
-    borderColor: colors.surfaceBorder,
-    gap: space.sm,
+  card: { marginBottom: space.md },
+  content: {
+    paddingLeft: 18,
+    paddingRight: 12,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   title: {
     fontFamily: fonts.body,
-    fontSize: 15,
-    letterSpacing: 1.3,
-    fontWeight: '800',
+    fontSize: 18,
+    letterSpacing: 0.8,
   },
-  titleRule: {
-    height: 3,
-    width: '72%',
-    borderRadius: 2,
-    opacity: 0.9,
+  titleUnderline: { marginTop: 0, marginBottom: 4 },
+  body: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+    gap: 6,
   },
+  left: { flex: 1, minWidth: 0 },
+  hero: {
+    fontFamily: fonts.display,
+    color: colors.textOnGreen,
+  },
+  subtitle: {
+    fontFamily: fonts.body,
+    fontSize: 9,
+    letterSpacing: 0.4,
+    color: colors.textMutedOnDark,
+    textTransform: 'uppercase',
+    marginTop: 2,
+  },
+  subtitleUnderline: { marginTop: 1, marginBottom: 8 },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: space.md,
-    marginTop: space.xs,
+    gap: space.sm,
+    marginTop: 2,
   },
-  stat: { flex: 1, minWidth: 0 },
+  statCol: { flexShrink: 1, minWidth: 0 },
+  statDivider: {
+    width: 1,
+    alignSelf: 'stretch',
+    backgroundColor: 'rgba(255,255,255,0.4)',
+    marginHorizontal: 4,
+  },
   statLabel: {
     fontFamily: fonts.body,
-    fontSize: 7,
+    fontSize: 9,
     letterSpacing: 0.5,
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  todayNum: {
-    fontFamily: fonts.display,
-    fontWeight: '400',
-  },
-  totalNum: {
-    fontFamily: fonts.display,
-    fontWeight: '400',
-  },
-  divider: { width: 2, alignSelf: 'stretch', marginHorizontal: space.xs, opacity: 0.9 },
-  desc: {
-    fontFamily: fonts.body,
-    fontSize: 7,
-    lineHeight: 15,
-    letterSpacing: 0.5,
-    color: colors.text,
-    marginTop: space.sm,
+    color: colors.textMutedOnDark,
     textTransform: 'uppercase',
   },
-  btn: {
-    marginTop: space.md,
-    borderRadius: radius.button,
-    paddingVertical: space.md,
-    alignItems: 'center',
-    borderWidth: 2,
-  },
-  btnPressed: { opacity: 0.92 },
-  btnDisabled: { opacity: 0.55 },
-  btnInner: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  btnPlus: {
+  statNum: {
     fontFamily: fonts.display,
-    fontSize: 28,
+    fontSize: 16,
     color: colors.textOnGreen,
-    marginTop: -4,
+    marginTop: 1,
   },
-  btnText: {
+  splat: {
+    marginRight: -8,
+  },
+  paragraph: {
+    marginTop: 10,
     fontFamily: fonts.body,
-    fontSize: 15,
-    fontWeight: '900',
-    color: colors.textOnGreen,
-    letterSpacing: 2,
+    fontSize: 9,
+    lineHeight: 13,
+    letterSpacing: 0.4,
+    color: colors.textMutedOnDark,
+    textTransform: 'uppercase',
   },
+  paragraphEmph: {
+    textDecorationLine: 'underline',
+  },
+  bottom: { marginTop: 8 },
 });

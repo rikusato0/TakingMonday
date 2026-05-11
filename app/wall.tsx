@@ -42,12 +42,14 @@ export default function WallScreen() {
             hitSlop={12}
             style={styles.backWrap}
           >
-            <View style={styles.backBorder}>
-              <Text style={styles.backText}>BACK</Text>
-            </View>
+            <Text style={styles.backText}>{'< '}BACK</Text>
           </Pressable>
-          <BrandHeader onRefresh={() => void refresh()} />
-          <Text style={styles.sub}>Click. For someone out there.</Text>
+          <BrandHeader
+            onRefresh={() => void refresh()}
+            onLongPressAdmin={() => router.push('/admin/login')}
+          />
+          <Text style={styles.pageTitle}>FOR SOMEONE WALL</Text>
+          <View style={styles.titleUnderline} />
         </View>
 
         <FlatList
@@ -71,7 +73,7 @@ export default function WallScreen() {
           )}
           ListFooterComponent={
             <Pressable onPress={() => void WebBrowser.openBrowserAsync(EXTERNAL.website)} style={styles.footerLink}>
-              <Text style={styles.footerText}>www.takingmonday.org</Text>
+              <Text style={styles.footerText}>Want your name on this page? Reach out on our website.</Text>
             </Pressable>
           }
         />
@@ -83,36 +85,38 @@ export default function WallScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
   head: { paddingHorizontal: space.lg, paddingBottom: space.sm },
-  backWrap: { alignSelf: 'flex-start', marginBottom: space.xs },
-  backBorder: {
-    borderWidth: 2,
-    borderColor: colors.orange,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.sm,
-    backgroundColor: 'rgba(0,0,0,0.12)',
-  },
+  backWrap: { alignSelf: 'flex-start', marginBottom: space.sm },
   backText: {
     fontFamily: fonts.body,
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: '900',
     color: colors.textOnGreen,
-    letterSpacing: 1,
+    letterSpacing: 0.6,
   },
-  sub: {
-    fontFamily: fonts.body,
-    fontSize: 12,
-    color: colors.textOnGreen,
-    marginTop: space.sm,
-    fontWeight: '700',
-    letterSpacing: 0.4,
+  pageTitle: {
+    fontFamily: fonts.display,
+    fontSize: 28,
+    color: colors.orange,
+    marginTop: space.md,
+    letterSpacing: 0.5,
+  },
+  titleUnderline: {
+    marginTop: space.xs,
+    height: 4,
+    width: '85%',
+    backgroundColor: colors.orange,
+    borderRadius: 2,
+    opacity: 0.95,
   },
   list: { padding: space.lg, paddingTop: space.sm, paddingBottom: space.xxl },
-  footerLink: { paddingVertical: space.xl, alignItems: 'center' },
+  footerLink: { paddingVertical: space.xl, paddingHorizontal: space.sm },
   footerText: {
     fontFamily: fonts.body,
-    fontSize: 14,
-    fontWeight: '800',
-    color: colors.textOnGreen,
-    textDecorationLine: 'underline',
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.textMutedOnDark,
+    textAlign: 'center',
+    lineHeight: 20,
+    letterSpacing: 0.3,
   },
 });

@@ -28,7 +28,7 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: colors.gradientEnd },
+            contentStyle: { backgroundColor: colors.canvas },
             animation: 'fade',
           }}
         />
