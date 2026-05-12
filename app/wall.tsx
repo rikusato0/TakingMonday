@@ -11,7 +11,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandHeader } from '../src/components/BrandHeader';
 import { ScreenGradient } from '../src/components/ScreenGradient';
 import { SupportCard } from '../src/components/SupportCard';
@@ -25,6 +25,7 @@ import { colors, fonts, space } from '../src/theme/tokens';
 export default function WallScreen() {
   const { publicWall, incrementWallPerson, refresh } = useAppData();
   const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
 
   useFocusEffect(
     useCallback(() => {
@@ -59,7 +60,10 @@ export default function WallScreen() {
     <ScreenGradient>
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
         <ScrollView
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[
+            styles.listContent,
+            { paddingBottom: Math.max(insets.bottom, space.sm) + space.lg },
+          ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -72,80 +76,85 @@ export default function WallScreen() {
             />
           }
         >
-          <View style={styles.head} collapsable={false}>
-            <BrandHeader
-              onRefresh={() => void refresh()}
-              onLongPressAdmin={() => router.push('/admin/login')}
-            />
+          <View>
+            <View style={styles.head} collapsable={false}>
+              <BrandHeader
+                variant="wall"
+                onRefresh={() => void refresh()}
+                onLongPressAdmin={() => router.push('/admin/login')}
+              />
 
-            <Pressable
-              onPress={goBackToMain}
-              hitSlop={12}
-              style={styles.backWrap}
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-            >
-              <View style={styles.backRow} collapsable={false}>
+              <Pressable
+                onPress={goBackToMain}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 14 }}
+                style={styles.backWrap}
+                accessibilityRole="button"
+                accessibilityLabel="Go back"
+              >
+                <View style={styles.backRow} collapsable={false}>
+                  <Image
+                    source={require('../assets/show/border_bottom_backbutton.png')}
+                    style={styles.backArrow}
+                    resizeMode="contain"
+                    accessibilityIgnoresInvertColors
+                  />
+                  <Text style={styles.backText}>BACK</Text>
+                </View>
+                <Underline
+                  source={require('../assets/show/border_grunge_backbutton.png')}
+                  width={64}
+                  height={4}
+                  style={styles.backUnder}
+                />
+              </Pressable>
+
+              <View style={styles.titleRow}>
                 <Image
-                  source={require('../assets/show/border_bottom_backbutton.png')}
-                  style={styles.backArrow}
+                  source={require('../assets/show/layer_163_for_someone_wall.png')}
+                  style={styles.titleDing}
                   resizeMode="contain"
                   accessibilityIgnoresInvertColors
                 />
-                <Text style={styles.backText}>BACK</Text>
+                <Text style={styles.pageTitle} adjustsFontSizeToFit minimumFontScale={0.82} numberOfLines={1}>
+                  FOR SOMEONE WALL
+                </Text>
+                <Image
+                  source={require('../assets/show/layer_166_for_someone_wall.png')}
+                  style={styles.titleDing}
+                  resizeMode="contain"
+                  accessibilityIgnoresInvertColors
+                />
               </View>
               <Underline
-                source={require('../assets/show/border_grunge_backbutton.png')}
-                width={64}
-                height={4}
-                style={styles.backUnder}
+                source={require('../assets/show/underline_for_someone_wall.png')}
+                width={240}
+                height={10}
+                style={styles.titleUnder}
               />
-            </Pressable>
 
-            <View style={styles.titleRow}>
-              <Image
-                source={require('../assets/show/layer_163_for_someone_wall.png')}
-                style={styles.titleDing}
-                resizeMode="contain"
-                accessibilityIgnoresInvertColors
-              />
-              <Text style={styles.pageTitle}>FOR SOMEONE WALL</Text>
-              <Image
-                source={require('../assets/show/layer_166_for_someone_wall.png')}
-                style={styles.titleDing}
-                resizeMode="contain"
-                accessibilityIgnoresInvertColors
-              />
+              <View style={styles.subtitleWrap}>
+                <Text style={styles.subtitle}>
+                  Click. For someone <Text style={styles.subtitleEmph}>out there.</Text>
+                </Text>
+                <Underline
+                  source={require('../assets/show/underline_out_there.png')}
+                  width={70}
+                  height={3}
+                  style={styles.subtitleUnder}
+                />
+              </View>
             </View>
-            <Underline
-              source={require('../assets/show/underline_for_someone_wall.png')}
-              width={240}
-              height={10}
-              style={styles.titleUnder}
-            />
 
-            <View style={styles.subtitleWrap}>
-              <Text style={styles.subtitle}>
-                Click. For someone <Text style={styles.subtitleEmph}>out there.</Text>
-              </Text>
-              <Underline
-                source={require('../assets/show/underline_out_there.png')}
-                width={70}
-                height={3}
-                style={styles.subtitleUnder}
+            {publicWall.map((item) => (
+              <SupportCard
+                key={item.id}
+                name={item.displayName}
+                location={item.location}
+                totalWishes={item.totalWishes}
+                onPass={() => void incrementWallPerson(item.id).catch(onErr)}
               />
-            </View>
+            ))}
           </View>
-
-          {publicWall.map((item) => (
-            <SupportCard
-              key={item.id}
-              name={item.displayName}
-              location={item.location}
-              totalWishes={item.totalWishes}
-              onPass={() => void incrementWallPerson(item.id).catch(onErr)}
-            />
-          ))}
 
           <Pressable
             onPress={() => void WebBrowser.openBrowserAsync(EXTERNAL.website)}
@@ -188,55 +197,67 @@ export default function WallScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
-  head: { paddingBottom: space.sm },
+  head: { paddingBottom: space.md },
   backWrap: {
     alignSelf: 'flex-start',
-    marginTop: 2,
-    marginBottom: space.sm,
-    paddingVertical: 2,
+    marginTop: space.sm,
+    marginBottom: space.md,
+    paddingVertical: space.xs,
+    paddingRight: space.sm,
   },
-  backRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  backArrow: { width: 14, height: 14 },
+  backRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  backArrow: { width: 16, height: 16 },
   backText: {
     fontFamily: fonts.body,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.textOnGreen,
     letterSpacing: 0.5,
   },
-  backUnder: { marginTop: 1, marginLeft: 18 },
+  backUnder: { marginTop: 2, marginLeft: 18 },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    marginTop: 4,
+    marginTop: space.xs,
+    paddingHorizontal: space.xs,
   },
-  titleDing: { width: 22, height: 22 },
+  titleDing: { width: 26, height: 26 },
   pageTitle: {
-    fontFamily: fonts.display,
-    fontSize: 30,
+    fontFamily: fonts.body,
+    fontSize: 34,
     color: colors.textOnGreen,
-    letterSpacing: 0.5,
+    letterSpacing: 0.65,
     textAlign: 'center',
+    flexShrink: 1,
+    maxWidth: '88%',
+    textTransform: 'uppercase',
   },
   titleUnder: { alignSelf: 'center', marginTop: 0, marginBottom: space.sm },
-  subtitleWrap: { alignItems: 'center', marginTop: 2, marginBottom: space.xs },
+  subtitleWrap: { alignItems: 'center', marginTop: space.xs, marginBottom: space.sm },
   subtitle: {
     fontFamily: fonts.body,
-    fontSize: 13,
+    fontSize: 14,
+    lineHeight: 20,
     color: colors.textOnGreen,
     letterSpacing: 0.3,
     textAlign: 'center',
+    paddingHorizontal: space.sm,
   },
-  subtitleEmph: { color: colors.textOnGreen },
-  subtitleUnder: { marginTop: 1, marginLeft: 70 },
+  subtitleEmph: { color: colors.textOnGreen, fontStyle: 'italic' },
+  subtitleUnder: { marginTop: 2, marginLeft: 70 },
+  /** Option B: footer sits at bottom when list is short; scrolls normally when long. */
   listContent: {
     flexGrow: 1,
+    justifyContent: 'space-between',
     paddingHorizontal: space.md,
-    paddingTop: space.xs,
-    paddingBottom: space.xxl,
+    paddingTop: space.sm,
   },
-  footerWrap: { paddingVertical: space.lg, paddingHorizontal: space.xs },
+  footerWrap: {
+    paddingTop: space.md,
+    paddingBottom: space.xs,
+    paddingHorizontal: space.xs,
+  },
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -248,8 +269,8 @@ const styles = StyleSheet.create({
   footerCenter: { flexShrink: 1, alignItems: 'center' },
   footerText: {
     fontFamily: fonts.body,
-    fontSize: 12,
-    lineHeight: 17,
+    fontSize: 13,
+    lineHeight: 19,
     color: colors.textOnGreen,
     textAlign: 'center',
     letterSpacing: 0.2,

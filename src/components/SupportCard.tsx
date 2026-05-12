@@ -20,9 +20,9 @@ function formatInt(n: number) {
 export function SupportCard({ name, location, totalWishes, busy, onPass }: Props) {
   const heroSize = useMemo(() => {
     const len = formatInt(totalWishes).length;
-    if (len >= 8) return 24;
-    if (len >= 6) return 28;
-    return 32;
+    if (len >= 8) return 34;
+    if (len >= 6) return 40;
+    return 46;
   }, [totalWishes]);
 
   return (
@@ -60,7 +60,8 @@ export function SupportCard({ name, location, totalWishes, busy, onPass }: Props
           </Text>
 
           <Text style={styles.sent}>
-            WISHES HAVE{'\n'}BEEN SENT.
+            WISHES HAVE{'\n'}
+            <Text style={styles.sentEmph}>BEEN SENT.</Text>
           </Text>
           <Underline
             source={require('../../assets/show/border_grunge_been_sent.png')}
@@ -75,8 +76,8 @@ export function SupportCard({ name, location, totalWishes, busy, onPass }: Props
           pressedSrc={require('../../assets/main/btn_pass_one_forward_pressed.png')}
           onPress={onPass}
           busy={busy}
-          width={124}
-          height={114}
+          width={158}
+          height={146}
           accessibilityLabel={`Pass one forward to ${name}`}
           style={styles.splat}
         />
@@ -88,56 +89,60 @@ export function SupportCard({ name, location, totalWishes, busy, onPass }: Props
 const styles = StyleSheet.create({
   card: { marginBottom: space.md },
   content: {
-    paddingLeft: 18,
-    paddingRight: 10,
-    paddingTop: 16,
-    paddingBottom: 18,
+    paddingLeft: 28,
+    paddingRight: 26,
+    paddingTop: 24,
+    paddingBottom: 26,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space.sm,
+    gap: space.md,
   },
   left: { flex: 1, minWidth: 0 },
   name: {
     fontFamily: fonts.body,
-    fontSize: 20,
+    fontSize: 21,
     color: colors.orange,
-    letterSpacing: 0.6,
+    letterSpacing: 0.55,
   },
-  nameUnder: { marginTop: 2, marginBottom: 2 },
+  nameUnder: { marginTop: 4, marginBottom: 4 },
   locRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 8,
+    gap: 8,
+    marginTop: 10,
   },
-  pin: { width: 12, height: 16 },
+  pin: { width: 14, height: 18 },
   loc: {
     flexShrink: 1,
     fontFamily: fonts.body,
-    fontSize: 11,
+    fontSize: 12,
     color: colors.goodGreenBright,
-    letterSpacing: 0.5,
+    letterSpacing: 0.48,
     textTransform: 'uppercase',
   },
   hero: {
     fontFamily: fonts.display,
     color: colors.textOnGreen,
-    marginTop: 6,
+    marginTop: 8,
   },
   sent: {
     fontFamily: fonts.body,
-    fontSize: 11,
-    lineHeight: 14,
+    fontSize: 12,
+    lineHeight: 15,
     color: colors.textOnGreen,
-    letterSpacing: 0.4,
+    letterSpacing: 0.42,
     textTransform: 'uppercase',
-    marginTop: 2,
+    marginTop: 4,
   },
-  sentUnder: { marginTop: 2 },
+  sentEmph: {
+    color: colors.orange,
+    letterSpacing: 0.42,
+    textTransform: 'uppercase',
+  },
+  sentUnder: { marginTop: 4 },
   splat: {
-    marginRight: -6,
-    marginLeft: -4,
+    alignSelf: 'center',
   },
 });
