@@ -1,7 +1,16 @@
 import * as WebBrowser from 'expo-web-browser';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Image,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandHeader } from '../src/components/BrandHeader';
 import { ScreenGradient } from '../src/components/ScreenGradient';
@@ -15,7 +24,7 @@ import { colors, fonts, space } from '../src/theme/tokens';
 
 export default function WallScreen() {
   const { publicWall, incrementWallPerson, refresh } = useAppData();
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -31,94 +40,105 @@ export default function WallScreen() {
     }
   }, []);
 
+  const onPullRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refresh]);
+
+  const listHeader = useCallback(
+    () => (
+      <View style={styles.head}>
+        <BrandHeader
+          onRefresh={() => void refresh()}
+          onLongPressAdmin={() => router.push('/admin/login')}
+        />
+
+        <Pressable
+          onPress={() => {
+            void refresh();
+            router.back();
+          }}
+          hitSlop={12}
+          style={styles.backWrap}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <View style={styles.backRow}>
+            <Image
+              source={require('../assets/show/border_bottom_backbutton.png')}
+              style={styles.backArrow}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
+            />
+            <Text style={styles.backText}>BACK</Text>
+          </View>
+          <Underline
+            source={require('../assets/show/border_grunge_backbutton.png')}
+            width={64}
+            height={4}
+            style={styles.backUnder}
+          />
+        </Pressable>
+
+        <View style={styles.titleRow}>
+          <Image
+            source={require('../assets/show/layer_163_for_someone_wall.png')}
+            style={styles.titleDing}
+            resizeMode="contain"
+            accessibilityIgnoresInvertColors
+          />
+          <Text style={styles.pageTitle}>FOR SOMEONE WALL</Text>
+          <Image
+            source={require('../assets/show/layer_166_for_someone_wall.png')}
+            style={styles.titleDing}
+            resizeMode="contain"
+            accessibilityIgnoresInvertColors
+          />
+        </View>
+        <Underline
+          source={require('../assets/show/underline_for_someone_wall.png')}
+          width={240}
+          height={10}
+          style={styles.titleUnder}
+        />
+
+        <View style={styles.subtitleWrap}>
+          <Text style={styles.subtitle}>
+            Click. For someone <Text style={styles.subtitleEmph}>out there.</Text>
+          </Text>
+          <Underline
+            source={require('../assets/show/underline_out_there.png')}
+            width={70}
+            height={3}
+            style={styles.subtitleUnder}
+          />
+        </View>
+      </View>
+    ),
+    [refresh],
+  );
+
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
-        <View style={styles.head}>
-          <BrandHeader
-            onRefresh={() => void refresh()}
-            onLongPressAdmin={() => router.push('/admin/login')}
-          />
-
-          <Pressable
-            onPress={() => {
-              void refresh();
-              router.back();
-            }}
-            hitSlop={12}
-            style={styles.backWrap}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <View style={styles.backRow}>
-              <Image
-                source={require('../assets/show/border_bottom_backbutton.png')}
-                style={styles.backArrow}
-                resizeMode="contain"
-                accessibilityIgnoresInvertColors
-              />
-              <Text style={styles.backText}>BACK</Text>
-            </View>
-            <Underline
-              source={require('../assets/show/border_grunge_backbutton.png')}
-              width={64}
-              height={4}
-              style={styles.backUnder}
-            />
-          </Pressable>
-
-          <View style={styles.titleRow}>
-            <Image
-              source={require('../assets/show/layer_163_for_someone_wall.png')}
-              style={styles.titleDing}
-              resizeMode="contain"
-              accessibilityIgnoresInvertColors
-            />
-            <Text style={styles.pageTitle}>FOR SOMEONE WALL</Text>
-            <Image
-              source={require('../assets/show/layer_166_for_someone_wall.png')}
-              style={styles.titleDing}
-              resizeMode="contain"
-              accessibilityIgnoresInvertColors
-            />
-          </View>
-          <Underline
-            source={require('../assets/show/underline_for_someone_wall.png')}
-            width={240}
-            height={10}
-            style={styles.titleUnder}
-          />
-
-          <View style={styles.subtitleWrap}>
-            <Text style={styles.subtitle}>
-              Click. For someone <Text style={styles.subtitleEmph}>out there.</Text>
-            </Text>
-            <Underline
-              source={require('../assets/show/underline_out_there.png')}
-              width={70}
-              height={3}
-              style={styles.subtitleUnder}
-            />
-          </View>
-        </View>
-
         <FlatList
           data={publicWall}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={() => void onPullRefresh()} tintColor="#fff" />
+          }
+          ListHeaderComponent={listHeader}
           renderItem={({ item }) => (
             <SupportCard
               name={item.displayName}
               location={item.location}
               totalWishes={item.totalWishes}
-              busy={busyId === item.id}
-              onPass={() => {
-                if (busyId) return;
-                setBusyId(item.id);
-                void incrementWallPerson(item.id)
-                  .catch(onErr)
-                  .finally(() => setBusyId(null));
-              }}
+              onPass={() => void incrementWallPerson(item.id).catch(onErr)}
             />
           )}
           ListFooterComponent={
@@ -137,7 +157,8 @@ export default function WallScreen() {
                 />
                 <View style={styles.footerCenter}>
                   <Text style={styles.footerText}>
-                    Want your name on this page?{'\n'}Reach out on <Text style={styles.footerEmph}>our website.</Text>
+                    Want your name on this page?{'\n'}Reach out on{' '}
+                    <Text style={styles.footerEmph}>our website.</Text>
                   </Text>
                   <Underline
                     source={require('../assets/show/underline_green_our_website.png')}
@@ -163,7 +184,7 @@ export default function WallScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
-  head: { paddingHorizontal: space.md, paddingBottom: space.sm },
+  head: { paddingBottom: space.sm },
   backWrap: {
     alignSelf: 'flex-start',
     marginTop: 2,
@@ -205,9 +226,10 @@ const styles = StyleSheet.create({
   },
   subtitleEmph: { color: colors.textOnGreen },
   subtitleUnder: { marginTop: 1, marginLeft: 70 },
-  list: {
+  listContent: {
+    flexGrow: 1,
     paddingHorizontal: space.md,
-    paddingTop: space.sm,
+    paddingTop: space.xs,
     paddingBottom: space.xxl,
   },
   footerWrap: { paddingVertical: space.lg, paddingHorizontal: space.xs },

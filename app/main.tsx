@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { Alert, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandHeader } from '../src/components/BrandHeader';
@@ -15,8 +15,6 @@ import { space } from '../src/theme/tokens';
 
 export default function MainScreen() {
   const { counters, incrementGoodThings, incrementGoodWishes, refresh } = useAppData();
-  const [busyG, setBusyG] = useState(false);
-  const [busyW, setBusyW] = useState(false);
 
   const onErr = useCallback((e: unknown) => {
     if (e instanceof RateLimitError) {
@@ -45,14 +43,7 @@ export default function MainScreen() {
             subtitle="GOOD THINGS HAVE BEEN DONE"
             today={counters.goodThingsToday}
             total={counters.goodThingsTotal}
-            busy={busyG}
-            onAction={() => {
-              if (busyG) return;
-              setBusyG(true);
-              void incrementGoodThings()
-                .catch(onErr)
-                .finally(() => setBusyG(false));
-            }}
+            onAction={() => void incrementGoodThings().catch(onErr)}
             paragraph={{
               before: 'CLICK IF YOU DID SOMETHING GOOD OR SAW ',
               emphasized: 'SOMEONE ELSE',
@@ -66,14 +57,7 @@ export default function MainScreen() {
             subtitle="GOOD WISHES HAVE BEEN MADE"
             today={counters.goodWishesToday}
             total={counters.goodWishesTotal}
-            busy={busyW}
-            onAction={() => {
-              if (busyW) return;
-              setBusyW(true);
-              void incrementGoodWishes()
-                .catch(onErr)
-                .finally(() => setBusyW(false));
-            }}
+            onAction={() => void incrementGoodWishes().catch(onErr)}
             bottomRow={<ShowUpRow onPress={() => router.push('/wall')} />}
           />
 
