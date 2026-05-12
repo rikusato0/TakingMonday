@@ -3,10 +3,10 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   Alert,
-  FlatList,
   Image,
   Pressable,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -49,134 +49,138 @@ export default function WallScreen() {
     }
   }, [refresh]);
 
-  const listHeader = useCallback(
-    () => (
-      <View style={styles.head}>
-        <BrandHeader
-          onRefresh={() => void refresh()}
-          onLongPressAdmin={() => router.push('/admin/login')}
-        />
-
-        <Pressable
-          onPress={() => {
-            void refresh();
-            router.back();
-          }}
-          hitSlop={12}
-          style={styles.backWrap}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <View style={styles.backRow}>
-            <Image
-              source={require('../assets/show/border_bottom_backbutton.png')}
-              style={styles.backArrow}
-              resizeMode="contain"
-              accessibilityIgnoresInvertColors
-            />
-            <Text style={styles.backText}>BACK</Text>
-          </View>
-          <Underline
-            source={require('../assets/show/border_grunge_backbutton.png')}
-            width={64}
-            height={4}
-            style={styles.backUnder}
-          />
-        </Pressable>
-
-        <View style={styles.titleRow}>
-          <Image
-            source={require('../assets/show/layer_163_for_someone_wall.png')}
-            style={styles.titleDing}
-            resizeMode="contain"
-            accessibilityIgnoresInvertColors
-          />
-          <Text style={styles.pageTitle}>FOR SOMEONE WALL</Text>
-          <Image
-            source={require('../assets/show/layer_166_for_someone_wall.png')}
-            style={styles.titleDing}
-            resizeMode="contain"
-            accessibilityIgnoresInvertColors
-          />
-        </View>
-        <Underline
-          source={require('../assets/show/underline_for_someone_wall.png')}
-          width={240}
-          height={10}
-          style={styles.titleUnder}
-        />
-
-        <View style={styles.subtitleWrap}>
-          <Text style={styles.subtitle}>
-            Click. For someone <Text style={styles.subtitleEmph}>out there.</Text>
-          </Text>
-          <Underline
-            source={require('../assets/show/underline_out_there.png')}
-            width={70}
-            height={3}
-            style={styles.subtitleUnder}
-          />
-        </View>
-      </View>
-    ),
-    [refresh],
-  );
+  /** `router.back()` can no-op on some stacks; `dismissTo` pops until `/main` or replaces with it. */
+  const goBackToMain = useCallback(() => {
+    void refresh();
+    router.dismissTo('/main');
+  }, [refresh]);
 
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
-        <FlatList
-          data={publicWall}
-          keyExtractor={(item) => item.id}
+        <ScrollView
           contentContainerStyle={styles.listContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={() => void onPullRefresh()} tintColor="#fff" />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => void onPullRefresh()}
+              tintColor="#fff"
+              colors={['#ffffff']}
+              progressBackgroundColor="#1a1a1a"
+            />
           }
-          ListHeaderComponent={listHeader}
-          renderItem={({ item }) => (
+        >
+          <View style={styles.head} collapsable={false}>
+            <BrandHeader
+              onRefresh={() => void refresh()}
+              onLongPressAdmin={() => router.push('/admin/login')}
+            />
+
+            <Pressable
+              onPress={goBackToMain}
+              hitSlop={12}
+              style={styles.backWrap}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+            >
+              <View style={styles.backRow} collapsable={false}>
+                <Image
+                  source={require('../assets/show/border_bottom_backbutton.png')}
+                  style={styles.backArrow}
+                  resizeMode="contain"
+                  accessibilityIgnoresInvertColors
+                />
+                <Text style={styles.backText}>BACK</Text>
+              </View>
+              <Underline
+                source={require('../assets/show/border_grunge_backbutton.png')}
+                width={64}
+                height={4}
+                style={styles.backUnder}
+              />
+            </Pressable>
+
+            <View style={styles.titleRow}>
+              <Image
+                source={require('../assets/show/layer_163_for_someone_wall.png')}
+                style={styles.titleDing}
+                resizeMode="contain"
+                accessibilityIgnoresInvertColors
+              />
+              <Text style={styles.pageTitle}>FOR SOMEONE WALL</Text>
+              <Image
+                source={require('../assets/show/layer_166_for_someone_wall.png')}
+                style={styles.titleDing}
+                resizeMode="contain"
+                accessibilityIgnoresInvertColors
+              />
+            </View>
+            <Underline
+              source={require('../assets/show/underline_for_someone_wall.png')}
+              width={240}
+              height={10}
+              style={styles.titleUnder}
+            />
+
+            <View style={styles.subtitleWrap}>
+              <Text style={styles.subtitle}>
+                Click. For someone <Text style={styles.subtitleEmph}>out there.</Text>
+              </Text>
+              <Underline
+                source={require('../assets/show/underline_out_there.png')}
+                width={70}
+                height={3}
+                style={styles.subtitleUnder}
+              />
+            </View>
+          </View>
+
+          {publicWall.map((item) => (
             <SupportCard
+              key={item.id}
               name={item.displayName}
               location={item.location}
               totalWishes={item.totalWishes}
               onPass={() => void incrementWallPerson(item.id).catch(onErr)}
             />
-          )}
-          ListFooterComponent={
-            <Pressable
-              onPress={() => void WebBrowser.openBrowserAsync(EXTERNAL.website)}
-              style={styles.footerWrap}
-              accessibilityRole="link"
-              accessibilityLabel="Reach out on our website"
-            >
-              <View style={styles.footerRow}>
-                <Image
-                  source={require('../assets/show/arrow.png')}
-                  style={styles.footerArrow}
-                  resizeMode="contain"
-                  accessibilityIgnoresInvertColors
-                />
-                <View style={styles.footerCenter}>
-                  <Text style={styles.footerText}>
-                    Want your name on this page?{'\n'}Reach out on{' '}
-                    <Text style={styles.footerEmph}>our website.</Text>
-                  </Text>
-                  <Underline
-                    source={require('../assets/show/underline_green_our_website.png')}
-                    width={92}
-                    height={4}
-                    style={styles.footerUnder}
-                  />
-                </View>
-                <Image
-                  source={require('../assets/show/heart_outline.png')}
-                  style={styles.footerHeart}
-                  resizeMode="contain"
-                  accessibilityIgnoresInvertColors
+          ))}
+
+          <Pressable
+            onPress={() => void WebBrowser.openBrowserAsync(EXTERNAL.website)}
+            style={styles.footerWrap}
+            accessibilityRole="link"
+            accessibilityLabel="Reach out on our website"
+          >
+            <View style={styles.footerRow}>
+              <Image
+                source={require('../assets/show/arrow.png')}
+                style={styles.footerArrow}
+                resizeMode="contain"
+                accessibilityIgnoresInvertColors
+              />
+              <View style={styles.footerCenter}>
+                <Text style={styles.footerText}>
+                  Want your name on this page?{'\n'}Reach out on{' '}
+                  <Text style={styles.footerEmph}>our website.</Text>
+                </Text>
+                <Underline
+                  source={require('../assets/show/underline_green_our_website.png')}
+                  width={92}
+                  height={4}
+                  style={styles.footerUnder}
                 />
               </View>
-            </Pressable>
-          }
-        />
+              <Image
+                source={require('../assets/show/heart_outline.png')}
+                style={styles.footerHeart}
+                resizeMode="contain"
+                accessibilityIgnoresInvertColors
+              />
+            </View>
+          </Pressable>
+        </ScrollView>
       </SafeAreaView>
     </ScreenGradient>
   );
