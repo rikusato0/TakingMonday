@@ -11,6 +11,8 @@
     "android:online": "expo start --android",
     "build:assets": "node scripts/build-assets.cjs",
     "seed:admin": "node scripts/seed-admin.cjs",
+    "eas:init": "eas init",
+    "build:apk": "eas build -p android --profile preview",
     "postinstall": "node scripts/patch-expo-cli-ldplayer.cjs"
   },
   "dependencies": {
@@ -34,6 +36,7 @@
     "react-native-screens": "~4.16.0"
   },
   "devDependencies": {
+    "eas-cli": "^16.28.0",
     "@types/react": "~19.1.0",
     "firebase-admin": "^13.9.0",
     "sharp": "^0.34.5",
