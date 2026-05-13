@@ -15,10 +15,56 @@ import { useAppData } from '../../src/context/AppDataContext';
 import { AdminAuthError } from '../../src/services/adminAuth';
 import { colors, space } from '../../src/theme/tokens';
 
-/** Normalized CAPTCHA answer: 67 + (÷2 sum) − 8 + 8 plus "Monday" → `67Monday` */
-const CAPTCHA_ANSWER = '67monday';
-const CAPTCHA_PROMPT =
-  'What is 67 plus 67, divided by 2, plus 8 minus 8, with the word yadnoM backwards (no spaces)?';
+type CaptchaChallenge = {
+  prompt: string;
+  /** Already-normalized expected answer (lowercase, no spaces). */
+  answer: string;
+};
+
+const CAPTCHA_CHALLENGES: CaptchaChallenge[] = [
+  {
+    prompt:
+      'What is 67 plus 67, divided by 2, plus 8 minus 8, with the word yadnoM backwards (no spaces)?',
+    answer: '67monday',
+  },
+  {
+    prompt:
+      'What is 10 plus 10, divided by 2, plus 1 minus 1, with the word yadnoM backwards (no spaces)?',
+    answer: '10monday',
+  },
+  {
+    prompt:
+      'What is 44 plus 44, divided by 2, minus 4 plus 4, with the word yadnoM backwards (no spaces)?',
+    answer: '44monday',
+  },
+  {
+    prompt:
+      'What is 24 plus 24, divided by 2, plus 6 minus 6, with the word yadnoM backwards (no spaces)?',
+    answer: '24monday',
+  },
+  {
+    prompt:
+      'What is 14 plus 14, divided by 2, plus 7 minus 7, with the word yadseuT backwards (no spaces)?',
+    answer: '14tuesday',
+  },
+  {
+    prompt:
+      'What is 80 plus 80, divided by 2, plus 2 minus 2, with the word yadnoM backwards (no spaces)?',
+    answer: '80monday',
+  },
+];
+
+function pickRandomChallenge(excludeAnswer?: string): CaptchaChallenge {
+  if (CAPTCHA_CHALLENGES.length === 0) {
+    return { prompt: '', answer: '' };
+  }
+  let pick = CAPTCHA_CHALLENGES[Math.floor(Math.random() * CAPTCHA_CHALLENGES.length)];
+  let guard = 0;
+  while (excludeAnswer && pick.answer === excludeAnswer && guard++ < 8) {
+    pick = CAPTCHA_CHALLENGES[Math.floor(Math.random() * CAPTCHA_CHALLENGES.length)];
+  }
+  return pick;
+}
 
 function normalizeCaptchaInput(s: string): string {
   return s.trim().toLowerCase().replace(/\s+/g, '');
@@ -28,6 +74,7 @@ export default function AdminLoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [captcha, setCaptcha] = useState('');
+  const [captchaChallenge, setCaptchaChallenge] = useState(() => pickRandomChallenge());
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,8 +91,10 @@ export default function AdminLoginScreen() {
       setError('Enter email and password.');
       return;
     }
-    if (normalizeCaptchaInput(captcha) !== CAPTCHA_ANSWER) {
+    if (normalizeCaptchaInput(captcha) !== captchaChallenge.answer) {
       setError('Answer does not match the security question.');
+      setCaptcha('');
+      setCaptchaChallenge((prev) => pickRandomChallenge(prev.answer));
       return;
     }
 
@@ -109,7 +158,7 @@ export default function AdminLoginScreen() {
             style={styles.input}
           />
           <Text style={styles.label}>Security question</Text>
-          <Text style={styles.captchaHint}>{CAPTCHA_PROMPT}</Text>
+          <Text style={styles.captchaHint}>{captchaChallenge.prompt}</Text>
           <TextInput
             value={captcha}
             onChangeText={setCaptcha}
