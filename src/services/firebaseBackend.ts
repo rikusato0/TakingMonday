@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -53,10 +54,10 @@ const listeners = new Set<() => void>();
 const defaultCounters = (): CounterStateRow => {
   const today = getEasternDateString();
   return {
-    goodThingsTotal: 45820,
-    goodThingsToday: 150,
-    goodWishesTotal: 12890,
-    goodWishesToday: 42,
+    goodThingsTotal: 0,
+    goodThingsToday: 0,
+    goodWishesTotal: 0,
+    goodWishesToday: 0,
     lastResetDate: today,
   };
 };
@@ -97,6 +98,30 @@ function applyDailyReset(counters: CounterStateRow): CounterStateRow {
     goodWishesToday: 0,
     lastResetDate: today,
   };
+}
+
+function countersNeedPersistAfterDailyReset(raw: CounterStateRow, normalized: CounterStateRow): boolean {
+  return (
+    raw.lastResetDate !== normalized.lastResetDate ||
+    raw.goodThingsToday !== normalized.goodThingsToday ||
+    raw.goodWishesToday !== normalized.goodWishesToday
+  );
+}
+
+async function persistDailyResetIfNeeded(onDisk: CounterStateRow): Promise<void> {
+  ensureReady();
+  const normalized = applyDailyReset(onDisk);
+  if (!countersNeedPersistAfterDailyReset(onDisk, normalized)) return;
+
+  await setDoc(
+    doc(db!, COUNTERS_COLLECTION, COUNTERS_DOC_ID),
+    {
+      goodThingsToday: normalized.goodThingsToday,
+      goodWishesToday: normalized.goodWishesToday,
+      lastResetDate: normalized.lastResetDate,
+    },
+    { merge: true },
+  );
 }
 
 function normalizeWallEntry(id: string, data: Partial<WallEntryRow>): WallEntryRow {
@@ -142,7 +167,9 @@ async function loadServerSnapshotOnce(): Promise<{ counters: CounterStateRow; wa
 
   let counters = defaultCounters();
   if (countersSnap.exists()) {
-    counters = applyDailyReset(countersSnap.data() as CounterStateRow);
+    const raw = countersSnap.data() as CounterStateRow;
+    counters = applyDailyReset(raw);
+    await persistDailyResetIfNeeded(raw);
   } else {
     counters = applyDailyReset(counters);
     await setDoc(countersRef, counters, { merge: true });
@@ -159,6 +186,11 @@ async function loadServerSnapshotOnce(): Promise<{ counters: CounterStateRow; wa
 
 function applyCountersFromServer(raw: CounterStateRow) {
   const normalized = applyDailyReset(raw);
+  if (countersNeedPersistAfterDailyReset(raw, normalized)) {
+    persistDailyResetIfNeeded(raw).catch((err: unknown) => {
+      console.warn('[TakingMonday] daily reset persist:', (err as Error)?.message ?? err);
+    });
+  }
   const prev = serverCounters;
   const dt = normalized.goodThingsTotal - prev.goodThingsTotal;
   if (dt > 0) {
@@ -376,7 +408,7 @@ export async function adminSaveWallEntry(entry: WallEntryRow) {
 
 export async function adminDeleteWallEntry(id: string) {
   ensureReady();
-  await setDoc(doc(db!, WALL_COLLECTION, id), { active: false }, { merge: true });
+  await deleteDoc(doc(db!, WALL_COLLECTION, id));
 }
 
 export async function adminReorderWall(orderedIds: string[]) {

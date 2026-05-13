@@ -80,7 +80,7 @@ export default function WallScreen() {
             <View style={styles.head} collapsable={false}>
               <BrandHeader
                 variant="wall"
-                onRefresh={() => void refresh()}
+                onRefresh={goBackToMain}
                 onLongPressAdmin={() => router.push('/admin/login')}
               />
 

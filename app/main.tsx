@@ -4,8 +4,8 @@ import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandHeader } from '../src/components/BrandHeader';
 import { CounterBlock } from '../src/components/CounterBlock';
-import { GoodWatchCard } from '../src/components/GoodWatchCard';
 import { MainMotto } from '../src/components/MainMotto';
+import { MainSocialLinks } from '../src/components/MainSocialLinks';
 import { ScreenGradient } from '../src/components/ScreenGradient';
 import { ShowUpRow } from '../src/components/ShowUpRow';
 import { RATE_LIMIT_MESSAGE } from '../src/constants/config';
@@ -65,10 +65,10 @@ export default function MainScreen() {
               bottomRow={<ShowUpRow onPress={() => router.push('/wall')} />}
             />
 
-            <GoodWatchCard />
           </View>
 
           <MainMotto />
+          <MainSocialLinks />
         </ScrollView>
       </SafeAreaView>
     </ScreenGradient>

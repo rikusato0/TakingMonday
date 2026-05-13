@@ -15,8 +15,14 @@ import { useAppData } from '../../src/context/AppDataContext';
 import { AdminAuthError } from '../../src/services/adminAuth';
 import { colors, space } from '../../src/theme/tokens';
 
-const CAPTCHA_WORD = 'monday';
+/** Normalized CAPTCHA answer: 67 + (÷2 sum) − 8 + 8 plus "Monday" → `67Monday` */
+const CAPTCHA_ANSWER = '67monday';
+const CAPTCHA_PROMPT =
+  'What is 67 plus 67, divided by 2, plus 8 minus 8, with the word yadnoM backwards (no spaces)?';
 
+function normalizeCaptchaInput(s: string): string {
+  return s.trim().toLowerCase().replace(/\s+/g, '');
+}
 export default function AdminLoginScreen() {
   const { isAdmin, adminInitializing, signInAdmin } = useAppData();
   const [email, setEmail] = useState('');
@@ -38,8 +44,8 @@ export default function AdminLoginScreen() {
       setError('Enter email and password.');
       return;
     }
-    if (captcha.trim().toLowerCase() !== CAPTCHA_WORD) {
-      setError('CAPTCHA does not match. Hint: lowercase weekday.');
+    if (normalizeCaptchaInput(captcha) !== CAPTCHA_ANSWER) {
+      setError('Answer does not match the security question.');
       return;
     }
 
@@ -102,13 +108,14 @@ export default function AdminLoginScreen() {
             editable={!submitting}
             style={styles.input}
           />
-          <Text style={styles.label}>CAPTCHA — type the word: monday</Text>
+          <Text style={styles.label}>Security question</Text>
+          <Text style={styles.captchaHint}>{CAPTCHA_PROMPT}</Text>
           <TextInput
             value={captcha}
             onChangeText={setCaptcha}
             autoCapitalize="none"
             autoCorrect={false}
-            placeholder="monday"
+            placeholder="Answer"
             editable={!submitting}
             style={styles.input}
           />
@@ -141,6 +148,13 @@ const styles = StyleSheet.create({
   centerLoading: { alignItems: 'center', justifyContent: 'center' },
   box: { gap: space.sm, maxWidth: 480, width: '100%', alignSelf: 'center' },
   label: { fontWeight: '700', color: colors.text, marginTop: space.xs },
+  captchaHint: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.textMuted,
+    marginTop: 4,
+    marginBottom: 4,
+  },
   input: {
     borderWidth: 1,
     borderColor: colors.border,

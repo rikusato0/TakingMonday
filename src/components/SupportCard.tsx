@@ -19,10 +19,11 @@ function formatInt(n: number) {
 
 export function SupportCard({ name, location, totalWishes, busy, onPass }: Props) {
   const heroSize = useMemo(() => {
-    const len = formatInt(totalWishes).length;
-    if (len >= 8) return 34;
-    if (len >= 6) return 40;
-    return 46;
+    const len = formatInt(totalWishes).replace(/,/g, '').length;
+    if (len >= 10) return 40;
+    if (len >= 8) return 44;
+    if (len >= 6) return 48;
+    return 56;
   }, [totalWishes]);
 
   return (
@@ -55,7 +56,13 @@ export function SupportCard({ name, location, totalWishes, busy, onPass }: Props
             </Text>
           </View>
 
-          <Text style={[styles.hero, { fontSize: heroSize }]} numberOfLines={1} adjustsFontSizeToFit>
+          <Text
+            style={[styles.hero, { fontSize: heroSize }]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.38}
+            maxFontSizeMultiplier={1.12}
+          >
             {formatInt(totalWishes)}
           </Text>
 
@@ -126,6 +133,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.display,
     color: colors.textOnGreen,
     marginTop: 8,
+    alignSelf: 'stretch',
   },
   sent: {
     fontFamily: fonts.body,

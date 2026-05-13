@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useAppData } from '../../src/context/AppDataContext';
 import type { WallEntryRow } from '../../src/services/appBackend';
+import { AdminAuthError, changeAdminPassword } from '../../src/services/adminAuth';
 import { colors, radius, space } from '../../src/theme/tokens';
 
 export default function AdminDashboardScreen() {
@@ -27,6 +28,11 @@ export default function AdminDashboardScreen() {
   } = useAppData();
   const [modal, setModal] = useState<WallEntryRow | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [curPw, setCurPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [newPw2, setNewPw2] = useState('');
+  const [pwBusy, setPwBusy] = useState(false);
 
   const handleSignOut = useCallback(() => {
     Alert.alert('Sign out?', admin?.email ?? '', [
@@ -110,9 +116,14 @@ export default function AdminDashboardScreen() {
             </Text>
           ) : null}
         </View>
-        <Pressable onPress={openNew} style={styles.toolBtn}>
-          <Text style={styles.toolBtnText}>+ Add entry</Text>
-        </Pressable>
+        <View style={styles.toolbarBtns}>
+          <Pressable onPress={() => setPwOpen(true)} style={styles.toolBtnSecondary}>
+            <Text style={styles.toolBtnSecondaryText}>Change password</Text>
+          </Pressable>
+          <Pressable onPress={openNew} style={styles.toolBtn}>
+            <Text style={styles.toolBtnText}>+ Add entry</Text>
+          </Pressable>
+        </View>
       </View>
       <FlatList
         data={sorted}
@@ -152,7 +163,7 @@ export default function AdminDashboardScreen() {
               </Pressable>
               <Pressable
                 onPress={() => {
-                  Alert.alert('Delete entry?', item.displayName, [
+                  Alert.alert('Permanently delete?', `${item.displayName}\nThis cannot be undone.`, [
                     { text: 'Cancel', style: 'cancel' },
                     {
                       text: 'Delete',
@@ -219,6 +230,89 @@ export default function AdminDashboardScreen() {
           </View>
         </View>
       </Modal>
+
+      <Modal visible={pwOpen} animationType="slide" transparent>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Change password</Text>
+            <Text style={styles.label}>Current password</Text>
+            <TextInput
+              value={curPw}
+              onChangeText={setCurPw}
+              secureTextEntry
+              style={styles.input}
+              editable={!pwBusy}
+              autoCapitalize="none"
+            />
+            <Text style={styles.label}>New password</Text>
+            <TextInput
+              value={newPw}
+              onChangeText={setNewPw}
+              secureTextEntry
+              style={styles.input}
+              editable={!pwBusy}
+              autoCapitalize="none"
+            />
+            <Text style={styles.label}>Confirm new password</Text>
+            <TextInput
+              value={newPw2}
+              onChangeText={setNewPw2}
+              secureTextEntry
+              style={styles.input}
+              editable={!pwBusy}
+              autoCapitalize="none"
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                onPress={() => {
+                  if (pwBusy) return;
+                  setPwOpen(false);
+                  setCurPw('');
+                  setNewPw('');
+                  setNewPw2('');
+                }}
+                style={styles.secondary}
+              >
+                <Text style={styles.secondaryText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  if (pwBusy) return;
+                  if (newPw !== newPw2) {
+                    Alert.alert('Passwords do not match', 'Re-enter the new password in both fields.');
+                    return;
+                  }
+                  setPwBusy(true);
+                  void (async () => {
+                    try {
+                      await changeAdminPassword(curPw, newPw);
+                      setCurPw('');
+                      setNewPw('');
+                      setNewPw2('');
+                      setPwOpen(false);
+                      Alert.alert('Password updated');
+                    } catch (e) {
+                      Alert.alert(
+                        'Could not change password',
+                        e instanceof AdminAuthError ? e.message : (e as Error)?.message ?? 'Try again.',
+                      );
+                    } finally {
+                      setPwBusy(false);
+                    }
+                  })();
+                }}
+                style={styles.primary}
+              >
+                {pwBusy ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.primaryText}>Save</Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -232,12 +326,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: space.md,
   },
+  toolbarBtns: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+  },
   toolBtn: {
     backgroundColor: colors.primary,
-    paddingHorizontal: space.lg,
+    paddingHorizontal: space.md,
     paddingVertical: space.sm,
     borderRadius: radius.button,
   },
+  toolBtnSecondary: {
+    borderWidth: 1,
+    borderColor: colors.primary,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+    borderRadius: radius.button,
+    backgroundColor: 'transparent',
+  },
+  toolBtnSecondaryText: { color: colors.primary, fontWeight: '800' },
   toolBtnText: { color: '#fff', fontWeight: '800' },
   signedIn: { color: colors.textMuted, fontSize: 13 },
   signedInEmail: { color: colors.text, fontWeight: '700' },

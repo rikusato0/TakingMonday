@@ -18,10 +18,15 @@ export function BrandHeader({ onLongPressAdmin, onRefresh, variant = 'default' }
   /** Tighter flanking icon + wordmark cluster like Figma (icons hug logo). */
   const wordmarkW = Math.min(268, Math.max(160, winW * 0.58));
 
+  const accessibilityLabel =
+    variant === 'wall'
+      ? 'Taking Monday — tap to return to the main page'
+      : 'Taking Monday — tap to refresh';
+
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Taking Monday, tap to refresh"
+      accessibilityLabel={accessibilityLabel}
       onPress={onRefresh}
       onLongPress={onLongPressAdmin}
       delayLongPress={ADMIN_LONG_PRESS_MS}

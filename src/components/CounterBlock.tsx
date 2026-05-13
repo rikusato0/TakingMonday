@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { colors, fonts, space } from '../theme/tokens';
 import { SprayCard } from './SprayCard';
 import { SplatButton } from './SplatButton';
@@ -52,6 +52,9 @@ function formatInt(n: number) {
   return new Intl.NumberFormat().format(n);
 }
 
+/** Below this logical width, stats sit on their own row (full card width) so ALL-TIME is readable beside a fixed-width splat. */
+const NARROW_BODY_BREAKPOINT = 440;
+
 export function CounterBlock({
   variant,
   title,
@@ -68,79 +71,133 @@ export function CounterBlock({
   const subtitleAccent = variant === 'green' ? colors.statGreen : colors.orange;
 
   const heroSize = useMemo(() => {
-    const len = formatInt(total).length;
-    if (len >= 8) return 32;
-    if (len >= 6) return 36;
-    return 40;
+    const len = formatInt(total).replace(/,/g, '').length;
+    if (len >= 10) return 36;
+    if (len >= 8) return 40;
+    if (len >= 6) return 44;
+    return 50;
   }, [total]);
 
-  const subtitlePrefix = variant === 'green' ? 'GOOD THINGS ' : 'GOOD WISHES ';
-  const subtitleSuffix = variant === 'green' ? 'HAVE BEEN DONE' : 'HAVE BEEN MADE';
+  const subtitle =
+    variant === 'green'
+      ? { line1: 'GOOD THINGS HAVE', lastWord: 'DONE' }
+      : { line1: 'GOOD WISHES HAVE', lastWord: 'SENT' };
+
+  const { width: windowWidth } = useWindowDimensions();
+  const narrowCounters = windowWidth < NARROW_BODY_BREAKPOINT;
+
+  const heroSubtitle = (
+    <>
+      <Text
+        style={[styles.hero, { fontSize: heroSize }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.38}
+        maxFontSizeMultiplier={1.15}
+      >
+        {formatInt(total)}
+      </Text>
+
+      <View style={styles.subtitleBlock}>
+        <Text style={styles.subtitleLine1} numberOfLines={2}>
+          {subtitle.line1}
+        </Text>
+        <View style={styles.subtitleLine2Row}>
+          <Text style={styles.subtitleBeenMuted} numberOfLines={1}>
+            BEEN{' '}
+          </Text>
+          <View style={styles.subtitleLastWordWrap}>
+            <Text style={[styles.subtitleLastWord, { color: subtitleAccent }]} numberOfLines={1}>
+              {subtitle.lastWord}
+            </Text>
+            <Underline
+              source={a.subtitleUnderline}
+              width="100%"
+              height={4}
+              style={styles.subtitleAccentUnder}
+            />
+          </View>
+        </View>
+      </View>
+    </>
+  );
+
+  const statsRow = (
+    <View style={[styles.statsRow, narrowCounters && styles.statsRowFullBleed]}>
+      <View style={styles.statColToday}>
+        <Text style={styles.statLabel} adjustsFontSizeToFit minimumFontScale={0.82} numberOfLines={1}>
+          TODAY
+        </Text>
+        <Text
+          style={[styles.statNumToday, { color: accent }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.65}
+        >
+          {formatInt(today)}
+        </Text>
+      </View>
+      <View style={styles.statDivider} />
+      <View style={styles.statColAllTime}>
+        <Text style={styles.statLabel} adjustsFontSizeToFit minimumFontScale={0.82} numberOfLines={1}>
+          ALL-TIME
+        </Text>
+        <Text
+          style={styles.statNumAllTime}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.65}
+        >
+          {formatInt(total)}
+        </Text>
+        <Underline source={a.statUnderline} width={78} height={3} />
+      </View>
+    </View>
+  );
 
   return (
     <SprayCard source={a.border} style={styles.card} contentStyle={styles.content}>
       <Text style={[styles.title, { color: accent }]}>{title}</Text>
       <Underline source={a.titleUnderline} width={130} height={7} style={styles.titleUnderline} />
 
-      <View style={styles.body}>
-        <View style={styles.left}>
-          <Text style={[styles.hero, { fontSize: heroSize }]} numberOfLines={1} adjustsFontSizeToFit>
-            {formatInt(total)}
-          </Text>
+      {narrowCounters ? (
+        <View style={styles.bodyColumn}>
+          <View style={styles.bodyTopRow}>
+            <View style={styles.left}>{heroSubtitle}</View>
 
-          <View style={styles.subtitleBlock}>
-            <View style={styles.subtitleRow}>
-              <Text style={styles.subtitlePrefix} numberOfLines={1}>
-                {subtitlePrefix}
-              </Text>
-              <View style={styles.subtitleSuffixWrap}>
-                <Text style={[styles.subtitleSuffix, { color: subtitleAccent }]} numberOfLines={1}>
-                  {subtitleSuffix}
-                </Text>
-                <Underline
-                  source={a.subtitleUnderline}
-                  width="100%"
-                  height={4}
-                  style={styles.subtitleAccentUnder}
-                />
-              </View>
-            </View>
+            <SplatButton
+              normal={a.btnNormal}
+              pressedSrc={a.btnPressed}
+              onPress={onAction}
+              busy={busy}
+              width={154}
+              height={132}
+              accessibilityLabel={variant === 'green' ? 'Add one good thing' : 'Pass one forward'}
+              style={styles.splatNarrow}
+            />
           </View>
-
-          <View style={styles.statsRow}>
-            <View style={styles.statColToday}>
-              <Text style={styles.statLabel}>TODAY</Text>
-              <Text
-                style={[styles.statNum, { color: accent }]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.85}
-              >
-                {formatInt(today)}
-              </Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statColAllTime}>
-              <Text style={styles.statLabel}>ALL-TIME</Text>
-              <Text style={styles.statNum} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
-                {formatInt(total)}
-              </Text>
-              <Underline source={a.statUnderline} width={78} height={3} />
-            </View>
-          </View>
+          {statsRow}
         </View>
+      ) : (
+        <View style={styles.body}>
+          <View style={styles.left}>
+            {heroSubtitle}
 
-        <SplatButton
-          normal={a.btnNormal}
-          pressedSrc={a.btnPressed}
-          onPress={onAction}
-          busy={busy}
-          width={154}
-          height={132}
-          accessibilityLabel={variant === 'green' ? 'Add one good thing' : 'Pass one forward'}
-          style={styles.splat}
-        />
-      </View>
+            {statsRow}
+          </View>
+
+          <SplatButton
+            normal={a.btnNormal}
+            pressedSrc={a.btnPressed}
+            onPress={onAction}
+            busy={busy}
+            width={154}
+            height={132}
+            accessibilityLabel={variant === 'green' ? 'Add one good thing' : 'Pass one forward'}
+            style={styles.splat}
+          />
+        </View>
+      )}
 
       {paragraph ? (
         <View style={styles.paragraphBlock}>
@@ -184,39 +241,59 @@ const styles = StyleSheet.create({
   titleUnderline: { marginTop: 0, marginBottom: 8 },
   body: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginTop: 10,
+    gap: 12,
+  },
+  /** Narrow phones: hero + subtitle + splat row, counter strip uses full inner width underneath. */
+  bodyColumn: {
+    marginTop: 10,
+    gap: space.sm,
+  },
+  bodyTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: 12,
   },
   left: { flex: 1, minWidth: 0 },
   hero: {
     fontFamily: fonts.display,
     color: colors.textOnGreen,
+    alignSelf: 'stretch',
   },
-  subtitleBlock: { marginTop: 5 },
-  /** Single baseline row: prefix + accent suffix + underline only under suffix (Figma). */
-  subtitleRow: {
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    alignItems: 'flex-start',
-    gap: 0,
+  subtitleBlock: {
+    marginTop: 6,
+    alignSelf: 'stretch',
+    gap: 2,
   },
-  subtitlePrefix: {
+  subtitleLine1: {
     fontFamily: fonts.body,
     fontSize: 10,
     lineHeight: 14,
     letterSpacing: 0.45,
     color: colors.textMutedOnDark,
     textTransform: 'uppercase',
-    flexShrink: 0,
-    paddingTop: 0,
   },
-  subtitleSuffixWrap: {
-    flexShrink: 1,
+  subtitleLine2Row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    alignSelf: 'flex-start',
+    maxWidth: '100%',
+  },
+  subtitleBeenMuted: {
+    fontFamily: fonts.body,
+    fontSize: 10,
+    lineHeight: 14,
+    letterSpacing: 0.45,
+    color: colors.textMutedOnDark,
+    textTransform: 'uppercase',
+  },
+  subtitleLastWordWrap: {
     minWidth: 0,
     alignItems: 'stretch',
   },
-  subtitleSuffix: {
+  subtitleLastWord: {
     fontFamily: fonts.body,
     fontSize: 10,
     lineHeight: 14,
@@ -230,17 +307,21 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: space.md,
+    gap: space.sm,
     marginTop: 8,
+    alignSelf: 'stretch',
   },
-  /** TODAY inset slightly — matches Figma column inset from divider. */
+  statsRowFullBleed: {
+    width: '100%',
+  },
+  /** Narrower TODAY band so divider sits left and ALL-TIME label has room. */
   statColToday: {
     flexGrow: 0,
-    flexShrink: 0,
-    width: '34%',
-    maxWidth: 128,
-    minWidth: 82,
-    paddingLeft: 12,
+    flexShrink: 1,
+    width: '28%',
+    maxWidth: 116,
+    minWidth: 0,
+    paddingLeft: 4,
   },
   statColAllTime: {
     flex: 1,
@@ -251,7 +332,7 @@ const styles = StyleSheet.create({
     width: 1,
     alignSelf: 'stretch',
     backgroundColor: 'rgba(255,255,255,0.4)',
-    marginHorizontal: 6,
+    marginHorizontal: 4,
   },
   statLabel: {
     fontFamily: fonts.body,
@@ -260,14 +341,28 @@ const styles = StyleSheet.create({
     color: colors.textMutedOnDark,
     textTransform: 'uppercase',
   },
-  statNum: {
+  statNumToday: {
     fontFamily: fonts.display,
-    fontSize: 22,
+    fontSize: 28,
     color: colors.textOnGreen,
     marginTop: 4,
+    alignSelf: 'stretch',
   },
+  statNumAllTime: {
+    fontFamily: fonts.display,
+    fontSize: 26,
+    color: colors.textOnGreen,
+    marginTop: 4,
+    alignSelf: 'stretch',
+  },
+  /** Slightly higher than vertical center beside the stacked left column on wide layouts. */
   splat: {
-    alignSelf: 'center',
+    alignSelf: 'flex-start',
+    marginTop: 6,
+  },
+  splatNarrow: {
+    alignSelf: 'flex-start',
+    marginTop: 2,
   },
   paragraphBlock: {
     marginTop: 14,

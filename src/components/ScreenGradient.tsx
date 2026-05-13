@@ -1,6 +1,10 @@
 import type { ReactNode } from 'react';
-import { Image, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { Image, StyleProp, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import { colors } from '../theme/tokens';
+
+/** At this width+, content is capped to mobile width and centered (Android tablet requirement). */
+const TABLET_SIDE_BY_SIDE_MIN_DP = 600;
+const MAX_MOBILE_CONTENT_WIDTH = 430;
 
 type Props = {
   children: ReactNode;
@@ -11,6 +15,16 @@ type Props = {
 
 /** Page background — Figma `bg_layer.png` (black canvas with grain edges). */
 export function ScreenGradient({ children, style, edgeAccents }: Props) {
+  const { width: screenW } = useWindowDimensions();
+  const clampWidth = screenW >= TABLET_SIDE_BY_SIDE_MIN_DP;
+  const tabletBandW = Math.min(screenW, MAX_MOBILE_CONTENT_WIDTH);
+
+  const inner = (
+    <View style={[styles.content, clampWidth && { width: tabletBandW }]}>
+      {children}
+    </View>
+  );
+
   return (
     <View style={[styles.flex, style]}>
       <Image
@@ -35,7 +49,13 @@ export function ScreenGradient({ children, style, edgeAccents }: Props) {
           />
         </>
       ) : null}
-      <View style={styles.content}>{children}</View>
+      {clampWidth ? (
+        <View style={styles.tabletFrame} pointerEvents="box-none">
+          {inner}
+        </View>
+      ) : (
+        inner
+      )}
     </View>
   );
 }
@@ -53,6 +73,12 @@ const styles = StyleSheet.create({
     opacity: 0.95,
   },
   content: { flex: 1 },
+  tabletFrame: {
+    flex: 1,
+    width: '100%',
+    alignSelf: 'stretch',
+    alignItems: 'center',
+  },
   accentLeft: {
     position: 'absolute',
     left: 0,
