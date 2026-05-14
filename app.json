@@ -18,7 +18,6 @@
       "bundleIdentifier": "com.takingmonday.app"
     },
     "android": {
-      "supportsTablet": true,
       "package": "com.takingmonday.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
