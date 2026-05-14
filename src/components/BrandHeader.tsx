@@ -10,13 +10,20 @@ type Props = {
   variant?: 'default' | 'wall';
 };
 
-const WORDMARK_ASPECT = 183 / 39;
+/** Source assets/brand-header.png — 287×138. */
+const BRAND_HEADER_ASPECT = 287 / 138;
 
 export function BrandHeader({ onLongPressAdmin, onRefresh, variant = 'default' }: Props) {
   const wrapStyle = variant === 'wall' ? styles.wrapWall : styles.wrap;
   const { width: winW } = useWindowDimensions();
-  /** Tighter flanking icon + wordmark cluster like Figma (icons hug logo). */
-  const wordmarkW = Math.min(268, Math.max(160, winW * 0.58));
+  const maxW = Math.min(340, Math.max(200, winW * 0.88));
+  const maxH = 72;
+  let headerW = maxW;
+  let headerH = headerW / BRAND_HEADER_ASPECT;
+  if (headerH > maxH) {
+    headerH = maxH;
+    headerW = headerH * BRAND_HEADER_ASPECT;
+  }
 
   const accessibilityLabel =
     variant === 'wall'
@@ -34,20 +41,8 @@ export function BrandHeader({ onLongPressAdmin, onRefresh, variant = 'default' }
     >
       <View style={styles.logoRow}>
         <Image
-          source={require('../../assets/smiley-mark.png')}
-          style={styles.smiley}
-          resizeMode="contain"
-          accessibilityIgnoresInvertColors
-        />
-        <Image
-          source={require('../../assets/logo-wordmark.png')}
-          style={[styles.wordmark, { width: wordmarkW, aspectRatio: WORDMARK_ASPECT }]}
-          resizeMode="contain"
-          accessibilityIgnoresInvertColors
-        />
-        <Image
-          source={require('../../assets/main/lightning.png')}
-          style={styles.lightning}
+          source={require('../../assets/brand-header.png')}
+          style={{ width: headerW, height: headerH }}
           resizeMode="contain"
           accessibilityIgnoresInvertColors
         />
@@ -97,10 +92,6 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingBottom: 2,
   },
-  /** Sit slightly lower vs wordmark (was visually hugging the top). */
-  smiley: { width: 42, height: 42, marginTop: 6 },
-  wordmark: { maxHeight: 46 },
-  lightning: { width: 28, height: 40, marginTop: 6 },
   taglineOuter: {
     marginTop: 10,
     alignSelf: 'center',

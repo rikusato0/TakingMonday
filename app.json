@@ -33,6 +33,13 @@
     "plugins": [
       "expo-router",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a31511e7-a2ea-4c10-bb75-36176f53ae15"
+      }
+    },
+    "owner": "riku_sato"
   }
 }
