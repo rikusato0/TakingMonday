@@ -3,7 +3,7 @@
     "name": "TakingMonday",
     "scheme": "takingmonday",
     "slug": "TakingMonday",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -18,7 +18,7 @@
       "bundleIdentifier": "com.takingmonday.app"
     },
     "android": {
-      "versionCode": 2,
+      "versionCode": 3,
       "package": "com.org.takingmonday",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
