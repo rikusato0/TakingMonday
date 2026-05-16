@@ -17,6 +17,11 @@
     "production": {
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "ANDROID_HOME": "/root/Android/Sdk",
+        "ANDROID_SDK_ROOT": "/root/Android/Sdk",
+        "ANDROID_NDK_HOME": "/root/Android/Sdk/ndk/27.1.12297006"
       }
     }
   },
