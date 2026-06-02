@@ -150,7 +150,7 @@ export function CounterBlock({
         >
           {formatInt(total)}
         </Text>
-        <Underline source={a.statUnderline} width={78} height={3} />
+        <Underline source={a.statUnderline} width={88} height={3} />
       </View>
     </View>
   );
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontFamily: fonts.body,
-    fontSize: 10,
+    fontSize: 11.25,
     letterSpacing: 0.55,
     color: colors.textMutedOnDark,
     textTransform: 'uppercase',
