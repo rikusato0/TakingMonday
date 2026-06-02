@@ -1,7 +1,6 @@
-import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { ADMIN_LONG_PRESS_MS } from '../constants/config';
-import { colors, fonts, space } from '../theme/tokens';
-import { Underline } from './Underline';
+import { space } from '../theme/tokens';
 
 type Props = {
   onLongPressAdmin?: () => void;
@@ -10,14 +9,14 @@ type Props = {
   variant?: 'default' | 'wall';
 };
 
-/** Source assets/brand-header.png — 287×138. */
-const BRAND_HEADER_ASPECT = 287 / 138;
+/** Source assets/logo-banner.png — single-line lockup, 1044×320. */
+const BRAND_HEADER_ASPECT = 1044 / 320;
 
 export function BrandHeader({ onLongPressAdmin, onRefresh, variant = 'default' }: Props) {
   const wrapStyle = variant === 'wall' ? styles.wrapWall : styles.wrap;
   const { width: winW } = useWindowDimensions();
-  const maxW = Math.min(340, Math.max(200, winW * 0.88));
-  const maxH = 72;
+  const maxW = Math.min(360, Math.max(220, winW * 0.92));
+  const maxH = 88;
   let headerW = maxW;
   let headerH = headerW / BRAND_HEADER_ASPECT;
   if (headerH > maxH) {
@@ -41,29 +40,11 @@ export function BrandHeader({ onLongPressAdmin, onRefresh, variant = 'default' }
     >
       <View style={styles.logoRow}>
         <Image
-          source={require('../../assets/brand-header.png')}
+          source={require('../../assets/logo-banner.png')}
           style={{ width: headerW, height: headerH }}
           resizeMode="contain"
           accessibilityIgnoresInvertColors
         />
-      </View>
-      {/** Centered block with lines left-aligned inside (Figma). Underline only under “LET’S DO”. */}
-      <View style={styles.taglineOuter}>
-        <View style={styles.taglineInner}>
-          <Text style={styles.taglineLine}>THE WORLD&apos;S A LOT.</Text>
-          <View style={styles.taglineSecond}>
-            <View style={styles.letsDoRow}>
-              <Text style={styles.taglineLets}>LET&apos;S DO </Text>
-              <Text style={styles.taglineRest}>SOMETHING ABOUT IT.</Text>
-            </View>
-            <Underline
-              source={require('../../assets/main/underline_lets_do_something_about_it.png')}
-              width={58}
-              height={5}
-              style={styles.taglineUnderlineShort}
-            />
-          </View>
-        </View>
       </View>
     </Pressable>
   );
@@ -91,52 +72,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingBottom: 2,
-  },
-  taglineOuter: {
-    marginTop: 10,
-    alignSelf: 'center',
-    maxWidth: '92%',
-  },
-  /** Lines stack with left edges aligned; whole block stays centered via taglineOuter. */
-  taglineInner: {
-    alignItems: 'flex-start',
-  },
-  taglineLine: {
-    fontFamily: fonts.body,
-    fontSize: 10,
-    lineHeight: 14,
-    letterSpacing: 0.45,
-    color: colors.textOnGreen,
-    textTransform: 'uppercase',
-    textAlign: 'left',
-  },
-  taglineSecond: {
-    marginTop: 2,
-    alignItems: 'flex-start',
-  },
-  letsDoRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-  },
-  taglineLets: {
-    fontFamily: fonts.body,
-    fontSize: 10,
-    lineHeight: 14,
-    letterSpacing: 0.45,
-    color: colors.textOnGreen,
-    textTransform: 'uppercase',
-  },
-  taglineRest: {
-    fontFamily: fonts.body,
-    fontSize: 10,
-    lineHeight: 14,
-    letterSpacing: 0.45,
-    color: colors.textOnGreen,
-    textTransform: 'uppercase',
-  },
-  taglineUnderlineShort: {
-    marginTop: 4,
-    alignSelf: 'flex-start',
   },
 });

@@ -48,10 +48,8 @@ export default function LoadingScreen() {
       pinH,
       textScale,
       underlineH: Math.max(3, Math.round(4 * textScale)),
-      taglineSize: Math.max(10, Math.round(11 * textScale)),
-      taglineLineHeight: Math.max(14, Math.round(16 * textScale)),
       captionSize: Math.max(11, Math.round(13 * textScale)),
-      headerMaxW: Math.min(360, innerW * 0.94),
+      headerMaxW: Math.min(400, innerW * 0.96),
       creditsMarginTop: compact ? space.md : space.lg,
       socialMarginTop: compact ? space.md : space.lg,
       loaderMarginTop: compact ? space.md : space.lg,
@@ -89,7 +87,6 @@ export default function LoadingScreen() {
 
   const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
 
-  const underlineLetsH = landingLayout.underlineH;
   const underlineGoodH = landingLayout.underlineH;
 
   if (failed) {
@@ -104,13 +101,6 @@ export default function LoadingScreen() {
     );
   }
 
-  const tagStyle = [
-    styles.tagline,
-    {
-      fontSize: landingLayout.taglineSize,
-      lineHeight: landingLayout.taglineLineHeight,
-    },
-  ];
   const capStyle = [styles.caption, { fontSize: landingLayout.captionSize }];
 
   return (
@@ -123,27 +113,11 @@ export default function LoadingScreen() {
           showsVerticalScrollIndicator={false}
         >
           <Image
-            source={require('../assets/landing/header.png')}
-            style={[styles.header, { width: '92%', maxWidth: landingLayout.headerMaxW, marginTop: 6 }]}
+            source={require('../assets/logo-banner.png')}
+            style={[styles.header, { width: '94%', maxWidth: landingLayout.headerMaxW, marginTop: 6 }]}
             resizeMode="contain"
             accessibilityIgnoresInvertColors
           />
-
-          <View style={styles.taglineWrap}>
-            <Text style={tagStyle}>THE WORLD&apos;S A LOT.</Text>
-            <View style={styles.inlineTagline}>
-              <View>
-                <Text style={tagStyle}>LET&apos;S</Text>
-                <Underline
-                  source={require('../assets/landing/underline_tagline_lets.png')}
-                  width="100%"
-                  height={underlineLetsH}
-                  style={styles.inlineUnder}
-                />
-              </View>
-              <Text style={tagStyle}> DO SOMETHING ABOUT IT.</Text>
-            </View>
-          </View>
 
           <View
             style={[
@@ -281,17 +255,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.xl,
   },
   header: {
-    aspectRatio: 850 / 410,
+    aspectRatio: 1044 / 320,
   },
-  taglineWrap: { alignItems: 'center', marginTop: space.xs },
-  tagline: {
-    fontFamily: fonts.body,
-    letterSpacing: 0.9,
-    color: colors.textOnGreen,
-    textAlign: 'center',
-    textTransform: 'uppercase',
-  },
-  inlineTagline: { flexDirection: 'row', alignItems: 'flex-start' },
   inlineCaption: {
     flexDirection: 'row',
     alignItems: 'flex-start',
