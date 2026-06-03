@@ -45,8 +45,8 @@ const styles = StyleSheet.create({
   },
   lead: {
     fontFamily: fonts.body,
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 19,
     letterSpacing: 0.32,
     color: colors.textOnGreen,
   },
@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: fonts.body,
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 19,
     letterSpacing: 0.32,
     color: colors.textOnGreen,
   },
